@@ -1,13 +1,11 @@
 from clevermaps_sdk import sdk
 
 
-# TODO remove
-project_id = "djflqntshvfj8efm"
+project_id = ""
 dwh_id = "viw8l4"
-access_token = "4sswi4oybs7KxHEOcxkDulz1zf_Ot5wGPqw8jxApVXM"
 server_url = "https://secure.clevermaps.io"
+access_token = ""
 
-###
 
 cm_sdk = sdk.Sdk(project_id, dwh_id, access_token, server_url)
 
