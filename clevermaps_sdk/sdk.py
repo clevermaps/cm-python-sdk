@@ -1,4 +1,5 @@
 import time
+from collections import OrderedDict
 from . import dwh, jobs, export, metadata, search, client
 
 
@@ -19,6 +20,7 @@ class Sdk:
         self.export_data = export.ExportData(self.client)
         self.metrics = metadata.Metrics(self.client)
         self.search = search.Search(self.client)
+
 
     def _get_query_content(self, project_id, properties_names, metric_names, filter_by):
 
@@ -49,13 +51,25 @@ class Sdk:
 
     def query(self, config, limit=1000):
 
-        query_content = self._get_query_content(self.project_id, config.get('properties', []),
-                                          config.get('metrics', []), config.get('filter_by', []))
+        query_content = self._get_query_content(self.project_id,
+                                                config.get('properties', []),
+                                                config.get('metrics', []),
+                                                config.get('filter_by', []))
 
         location = self.queries.accept_queries(query_content, limit)
         res = self.queries.get_queries(location)
 
-        return res['content']
+        res_content = res['content']
+
+        # Response does not preserve properties order, fix it back
+        props_order = [p['id'] for p in query_content['properties']]
+
+        res_content_ordered = []
+        for r in res_content:
+            res_content_ordered.append(OrderedDict((k, r['content'][k]) for k in props_order))
+
+        return res_content_ordered
+
 
     def get_property_values(self, property_name):
 
@@ -63,6 +77,7 @@ class Sdk:
         res = self.property_values.get_property_values(location)
 
         return res['content']
+
 
     def export_to_csv(self, config):
 
@@ -82,5 +97,3 @@ class Sdk:
                 raise Exception(job_status['status'])
 
             time.sleep(5)
-
-

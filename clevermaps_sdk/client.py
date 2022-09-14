@@ -1,7 +1,6 @@
 import json
 import requests
 
-
 class Client:
 
     def __init__(self, project_id, dwh_id, access_token, server_url):
