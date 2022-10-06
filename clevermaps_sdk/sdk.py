@@ -15,6 +15,7 @@ class Sdk:
 
         self.queries = dwh.Queries(self.client)
         self.property_values = dwh.PropertyValues(self.client)
+        self.available_datasets = dwh.AvailableDatasets(self.client)
         self.jobs = jobs.Jobs(self.client)
         self.job_detail = jobs.JobDetail(self.client)
         self.export_data = export.ExportData(self.client)
