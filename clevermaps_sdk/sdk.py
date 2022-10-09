@@ -71,13 +71,19 @@ class Sdk:
 
         return res_content_ordered
 
-
     def get_property_values(self, property_name):
 
         location = self.property_values.accept_property_values(property_name)
         res = self.property_values.get_property_values(location)
 
         return res['content']
+
+    def get_available_datasets(self, metric_name):
+
+        res = self.available_datasets.get_available_datasets(metric_name)
+        datasets = [dataset['name'] for dataset in res['content'][0]['availableDatasets'] if dataset]
+
+        return datasets
 
 
     def export_to_csv(self, config):
