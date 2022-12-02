@@ -1,6 +1,11 @@
 # CleverMaps Python SDK
 
-The `clevermaps-python-sdk` package provides a convenient way to interact with CleverMaps Platform using over REST API (https://clevermaps.docs.apiary.io/#).
+The `clevermaps-python-sdk` package provides a convenient way to interact with CleverMaps platform over the REST API (https://clevermaps.docs.apiary.io/#).
+
+The package can be used in following use cases:
+* Custom data apps on top of the CleverMaps Data Warehouse.
+* Custom data processing components
+* Custom data scripts
 
 Currently supported functions:
 * Query data and metrics
