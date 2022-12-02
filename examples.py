@@ -1,8 +1,12 @@
 from clevermaps_sdk import sdk
 
+# Your project_id (can be obtained from the url of the project or from the CleverMaps Shell)
 project_id = ""
-dwh_id = ""
+# Your project dwh_id - default value
+dwh_id = "viw8l4"
+# Server url - default value
 server_url = "https://secure.clevermaps.io"
+# Your access_token (https://clevermaps.docs.apiary.io/#reference/authentication)
 access_token = ""
 
 # CleverMaps SDK main object initialization
@@ -31,23 +35,6 @@ query_json = {
             "value": ["cafe", "restaurant"]
         }
     ]
-}
-
-query_json = {
-  "metrics": [
-      "pois_count_metric",
-      "pois_sum_metric"
-  ],
-  "properties": [
-      "poi_dwh.type_name"
-  ],
-  "filter_by": [
-      {
-          "property": "obec_dwh.nazev",
-          "operator": "eq",
-          "value": "Brno"
-      }
-  ]
 }
 
 # Print query results as json
