@@ -1,29 +1,30 @@
-# README #
+# CleverMaps Python SDK
 
-This README would normally document whatever steps are necessary to get your application up and running.
+The `clevermaps-python-sdk` package provides a convenient way to interact with CleverMaps Platform using over REST API (https://clevermaps.docs.apiary.io/#).
 
-### What is this repository for? ###
+Currently supported functions:
+* Query data and metrics
+* Export data and metrics
+* Fulltext search in the dataset
+* Distinct property values of the column
+* Avalailable datasets for the metric
+* List metrics
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+## Requirements
 
-### How do I get set up? ###
+-  CleverMaps project (https://clevermaps-internal.atlassian.net/wiki/spaces/CDD/pages/7536865/Tutorial+1+Creating+a+project+and+visualizing+your+data)
+-  Python 3.7 or newer
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+## Installation
 
-### Contribution guidelines ###
+Run the following command to install the `clevermaps-python-sdk` package on your system:
 
-* Writing tests
-* Code review
-* Other guidelines
+    pip install git+https://github.com/clevermaps/clevermaps-python-sdk.git
 
-### Who do I talk to? ###
+## Example
 
-* Repo owner or admin
-* Other community or team contact
+Check `examples.py`
+
+## Changelog
+
+0.0.1 Initial version
