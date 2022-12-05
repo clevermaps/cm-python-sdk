@@ -39,9 +39,7 @@ class Datasets(base.Base):
 
     def list_datasets(self):
 
-        url = '/rest/projects/{}/md/exports'.format(self.client.project_id)
+        url = '/rest/projects/{}/md/datasets'.format(self.client.project_id)
         resp = self.client.make_request('get', url=url)
 
         return resp.json()['content']
-
-
