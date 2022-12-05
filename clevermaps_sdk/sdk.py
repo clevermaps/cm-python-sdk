@@ -20,6 +20,7 @@ class Sdk:
         self.job_detail = jobs.JobDetail(self.client)
         self.export_data = export.ExportData(self.client)
         self.metrics = metadata.Metrics(self.client)
+        self.datasets = metadata.Datasets(self.client)
         self.search = search.Search(self.client)
 
 
