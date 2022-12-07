@@ -2,15 +2,20 @@ from clevermaps_sdk import sdk
 
 # Your project_id (can be obtained from the url of the project or from the CleverMaps Shell)
 project_id = ""
-# Your project dwh_id - default value
-dwh_id = "viw8l4"
-# Server url - default value
-server_url = "https://secure.clevermaps.io"
 # Your access_token (https://clevermaps.docs.apiary.io/#reference/authentication)
 access_token = ""
 
-# CleverMaps SDK main object initialization
-cm_sdk = sdk.Sdk(project_id, dwh_id, access_token, server_url)
+# CleverMaps SDK object initialization - WITHOUT specific project
+cm_sdk = sdk.Sdk(access_token)
+
+# In this case only some endpoints are available
+print(cm_sdk.projects.list_projects())
+print(cm_sdk.project.get_project_by_id(project_id))
+
+# CleverMaps SDK object initialization - WITH specific project
+cm_sdk = sdk.Sdk(access_token, project_id)
+
+# In this case all endpoints are available
 
 # Query data and metrics
 query_json = {
@@ -59,6 +64,9 @@ print(cm_sdk.get_property_values("poi_dwh.subtype_name"))
 
 # List all metrics in the project
 print(cm_sdk.metrics.list_metrics())
+
+# List all datasets in the project
+print(cm_sdk.datasets.list_datasets())
 
 # Fulltext search in dataset
 print(cm_sdk.search.search('poi_dwh', 'Albert'))

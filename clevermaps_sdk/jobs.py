@@ -9,7 +9,7 @@ class Jobs(base.Base):
 
         data = {
           "type": 'export',
-          "projectId": self.client.project_id,
+          "projectId": self.project_id,
           "headerTitles": False,
           "content": {
             "filename": filename,

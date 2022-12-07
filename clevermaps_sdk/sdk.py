@@ -1,37 +1,40 @@
 import time
 from collections import OrderedDict
-from . import dwh, jobs, export, metadata, search, client
+from . import dwh, jobs, export, metadata, search, client, projects
 
 
 class Sdk:
 
-    def __init__(self, project_id, dwh_id, access_token, server_url):
+    def __init__(self, access_token, project_id=None, server_url="https://secure.clevermaps.io"):
 
-        self.project_id = project_id
+        self.client = client.Client(access_token, server_url)
 
-        # TODO vsechny API endpointy
+        if project_id:
+            self.project_id = project_id
+            self.projects = projects.Projects(self.client)
+            self.project = projects.Project(self.client)
+            self.queries = dwh.Queries(self.client, self.project_id)
+            self.property_values = dwh.PropertyValues(self.client, self.project_id)
+            self.available_datasets = dwh.AvailableDatasets(self.client, self.project_id)
+            self.jobs = jobs.Jobs(self.client, self.project_id)
+            self.job_detail = jobs.JobDetail(self.client, self.project_id)
+            self.export_data = export.ExportData(self.client, self.project_id)
+            self.metrics = metadata.Metrics(self.client, self.project_id)
+            self.datasets = metadata.Datasets(self.client, self.project_id)
+            self.search = search.Search(self.client, self.project_id)
+        else:
+            self.projects = projects.Projects(self.client)
+            self.project = projects.Project(self.client)
 
-        self.client = client.Client(project_id, dwh_id, access_token, server_url)
 
-        self.queries = dwh.Queries(self.client)
-        self.property_values = dwh.PropertyValues(self.client)
-        self.available_datasets = dwh.AvailableDatasets(self.client)
-        self.jobs = jobs.Jobs(self.client)
-        self.job_detail = jobs.JobDetail(self.client)
-        self.export_data = export.ExportData(self.client)
-        self.metrics = metadata.Metrics(self.client)
-        self.datasets = metadata.Datasets(self.client)
-        self.search = search.Search(self.client)
-
-
-    def _get_query_content(self, project_id, properties_names, metric_names, filter_by):
+    def _get_query_content(self, properties_names, metric_names, filter_by):
 
         metrics = []
         for m in metric_names:
             metrics.append({
                 "id": m,
                 "type": "metric",
-                "metric": "/rest/projects/{}/md/metrics?name={}".format(project_id, m)
+                "metric": "/rest/projects/{}/md/metrics?name={}".format(self.project_id, m)
             })
 
         properties = []
@@ -53,8 +56,7 @@ class Sdk:
 
     def query(self, config, limit=1000):
 
-        query_content = self._get_query_content(self.project_id,
-                                                config.get('properties', []),
+        query_content = self._get_query_content(config.get('properties', []),
                                                 config.get('metrics', []),
                                                 config.get('filter_by', []))
 
@@ -68,7 +70,7 @@ class Sdk:
 
         res_content_ordered = []
         for r in res_content:
-            res_content_ordered.append(OrderedDict((k, r['content'][k]) for k in props_order))
+            res_content_ordered.append(dict(OrderedDict((k, r['content'][k]) for k in props_order)))
 
         return res_content_ordered
 
@@ -89,8 +91,9 @@ class Sdk:
 
     def export_to_csv(self, config):
 
-        query_content = self._get_query_content(self.project_id, config['query'].get('properties', []),
-                                          config['query'].get('metrics', []), config['query'].get('filter_by', []))
+        query_content = self._get_query_content(config['query'].get('properties', []),
+                                                config['query'].get('metrics', []),
+                                                config['query'].get('filter_by', []))
 
         job_resp = self.jobs.start_new_export_job(query_content, config['filename'], config['format'])
 

@@ -4,10 +4,8 @@ import requests
 
 class Client:
 
-    def __init__(self, project_id, dwh_id, access_token, server_url):
+    def __init__(self, access_token, server_url):
 
-        self.project_id = project_id
-        self.dwh_id = dwh_id
         self.base_url = server_url
         self.bearer_token = self._get_token(access_token)
 
