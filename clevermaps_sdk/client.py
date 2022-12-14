@@ -26,7 +26,7 @@ class Client:
         return resp.json()['access_token']
 
 
-    def http_request(self, method, url, data, headers):
+    def http_request(self, method, url, data, params, headers):
 
         if not headers:
             headers = {
@@ -39,25 +39,28 @@ class Client:
         if method == 'post':
             resp = requests.post(url='{}{}'.format(self.base_url, url), data=json.dumps(data), headers=headers)
         elif method == 'get':
-            resp = requests.get(url='{}{}'.format(self.base_url, url), params=json.dumps(data), headers=headers)
+            resp = requests.get(url='{}{}'.format(self.base_url, url), params=json.dumps(params), headers=headers)
 
         resp.raise_for_status()
 
         return resp
 
-    def paginate(self, method, url, data={}, headers=None):
+    def paginate(self, method, url, data, headers):
 
-        first_page = self.http_request(method, url, data, headers)
+        first_page = self.http_request(method=method, url=url, data=data, params={}, headers=headers)
         yield first_page
         first_page_json = first_page.json()
         if 'page' in first_page_json:
             num_pages = first_page.json()['page']['totalPages']
 
             for page in range(2, num_pages + 1):
-                next_page = self.http_request(method, url, data, headers)
+                params = {
+                    'page': page
+                }
+                next_page = self.http_request(method=method, url=url, data=data, params=params, headers=headers)
                 yield next_page
 
-    def make_request(self, method, url, data={}, headers=None):
+    def make_request(self, method, url, data={}, headers={}):
 
         pages = list(self.paginate(method, url, data, headers))
 
