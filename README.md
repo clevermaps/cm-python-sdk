@@ -11,8 +11,8 @@ Currently supported functions:
 * Query data and metrics
 * Export data and metrics
 * Fulltext search in the dataset
-* Distinct property values of the column
-* Avalailable datasets for the metric
+* Get distinct property values
+* Get available datasets for the metric
 * List metrics
 * Get metric metadata
 * List datasets

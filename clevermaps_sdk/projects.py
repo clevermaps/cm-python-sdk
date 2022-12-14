@@ -12,7 +12,13 @@ class Projects():
         url = '/rest/projects'
         resp = self.client.make_request('get', url=url)
 
-        return resp.json()['content']
+        projects = []
+
+        for page in resp:
+            content = page.json()['content']
+            projects.extend(content)
+
+        return projects
 
 class Project():
 
