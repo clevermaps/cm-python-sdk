@@ -1,6 +1,7 @@
 import json
 import requests
 
+from . import exceptions
 
 class Client:
 
@@ -21,7 +22,13 @@ class Client:
             "User-Agent": "CleverMaps Python SDK"
         }
 
-        resp = self.make_request(method='post', url='/rest/oauth/token', data=data, headers=headers)
+        try:
+            resp = self.make_request(method='post', url='/rest/oauth/token', data=data, headers=headers)
+        except requests.exceptions.HTTPError as ex:
+            if ex.response.status_code == 401:
+                raise exceptions.CleverMapsException('Verification of the access token was not successful. Please check if the access token value is valid.')
+        except Exception as ex:
+            raise ex
 
         return resp.json()['access_token']
 
@@ -49,8 +56,8 @@ class Client:
 
         first_page = self.http_request(method=method, url=url, data=data, params={}, headers=headers)
         yield first_page
-        first_page_json = first_page.json()
-        if 'page' in first_page_json:
+
+        if 'application/json' in first_page.headers.get('Content-Type', '') and 'page' in first_page.json():
             num_pages = first_page.json()['page']['totalPages']
 
             for page in range(2, num_pages + 1):

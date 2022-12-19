@@ -1,7 +1,7 @@
 import time
 from collections import OrderedDict
 from . import dwh, jobs, export, metadata, search, client, projects
-
+from . import exceptions
 
 class Sdk:
 
@@ -10,7 +10,9 @@ class Sdk:
         self.client = client.Client(access_token, server_url)
 
         if project_id:
+
             self.project_id = project_id
+
             self.projects = projects.Projects(self.client)
             self.project = projects.Project(self.client)
             self.queries = dwh.Queries(self.client, self.project_id)
@@ -25,7 +27,6 @@ class Sdk:
         else:
             self.projects = projects.Projects(self.client)
             self.project = projects.Project(self.client)
-
 
     def _get_query_content(self, properties_names, metric_names, filter_by):
 
@@ -87,7 +88,6 @@ class Sdk:
         datasets = [dataset['name'] for dataset in res['content'][0]['availableDatasets'] if dataset]
 
         return datasets
-
 
     def export_to_csv(self, config):
 

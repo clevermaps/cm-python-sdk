@@ -1,0 +1,2 @@
+class CleverMapsException(Exception):
+    pass
