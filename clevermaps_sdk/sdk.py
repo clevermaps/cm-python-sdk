@@ -2,7 +2,8 @@ import time
 from collections import OrderedDict
 from . import dwh, jobs, export, metadata, search, client, projects
 
-from .exceptions import ExportException
+from .exceptions import ExportException, InvalidDwhQueryException
+
 
 class Sdk:
 
@@ -31,6 +32,14 @@ class Sdk:
 
     def _get_query_content(self, properties_names, metric_names, filter_by):
 
+        invalid_props = self._validate_query_properties(properties_names)
+        invalid_metrics = self._validate_query_metrics(metric_names)
+        invalid_filter_props = self._validate_query_properties([f['property'] for f in filter_by])
+
+        if invalid_props or invalid_metrics or invalid_filter_props:
+            raise InvalidDwhQueryException('Query definition is invalid. Invalid properties: {}. Invalid metrics: {}. Invalid filter properties: {}.'.format(
+                    invalid_props, invalid_metrics, invalid_filter_props))
+
         metrics = []
         for m in metric_names:
             metrics.append({
@@ -56,12 +65,39 @@ class Sdk:
 
         return query
 
+    def _validate_query_metrics(self, metrics):
+
+        metrics_md = self.metrics.list_metrics()
+
+        return list(set(metrics).difference(set([m['name'] for m in metrics_md])))
+
+    def _validate_query_properties(self, properties):
+
+        invalid_props = []
+
+        datasets_mds = self.datasets.list_datasets()
+        for prop in properties:
+            ds = prop.split('.')[0]
+            if ds not in [d['name'] for d in datasets_mds]:
+                invalid_props.append(prop)
+                continue
+
+            ds_md = next(d for d in datasets_mds if d['name'] == ds)
+            ds_md_props = [dp['name'] for dp in ds_md['ref']['properties']]
+
+            p = prop.split('.')[1]
+            if p not in ds_md_props:
+                invalid_props.append(prop)
+
+        return invalid_props
 
     def query(self, config, limit=1000):
 
-        query_content = self._get_query_content(config.get('properties', []),
-                                                config.get('metrics', []),
-                                                config.get('filter_by', []))
+        props = config.get('properties', [])
+        metrics = config.get('metrics', [])
+        filter_by = config.get('filter_by', [])
+
+        query_content = self._get_query_content(props, metrics, filter_by)
 
         location = self.queries.accept_queries(query_content, limit)
         res = self.queries.get_queries(location)

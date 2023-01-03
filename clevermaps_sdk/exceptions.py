@@ -11,3 +11,7 @@ class AccessTokenException(CleverMapsSdkException):
 class ExportException(CleverMapsSdkException):
     """Raised in case of failed export"""
     pass
+
+class InvalidDwhQueryException(CleverMapsSdkException):
+    """Raised in case of invalid Datawarehouse Query"""
+    pass
