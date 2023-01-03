@@ -1,6 +1,8 @@
 import time
 from collections import OrderedDict
-from . import dwh, jobs, export, metadata, search, client, projects, exceptions
+from . import dwh, jobs, export, metadata, search, client, projects
+
+from .exceptions import ExportException
 
 class Sdk:
 
@@ -103,6 +105,6 @@ class Sdk:
             if job_status['status'] == 'SUCCEEDED':
                 return self.export_data.get_export_data(job_status['result']['exportResult'])
             elif job_status['status'] in ('FAILED', 'TIMED_OUT', 'ABORTED'):
-                raise exceptions.ExportException(job_status)
+                raise ExportException(job_status)
 
             time.sleep(5)

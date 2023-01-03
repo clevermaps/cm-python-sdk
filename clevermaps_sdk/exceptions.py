@@ -1,13 +1,13 @@
-class CleverMapsException(Exception):
+class CleverMapsSdkException(Exception):
     """Base custom exception"""
     pass
 
 
-class AccessTokenException(CleverMapsException):
+class AccessTokenException(CleverMapsSdkException):
     """Raised in case of invalid access token"""
     pass
 
 
-class ExportException(CleverMapsException):
+class ExportException(CleverMapsSdkException):
     """Raised in case of failed export"""
     pass
