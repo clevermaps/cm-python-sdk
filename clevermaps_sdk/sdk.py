@@ -1,7 +1,6 @@
 import time
 from collections import OrderedDict
 from . import dwh, jobs, export, metadata, search, client, projects
-from . import exceptions
 
 class Sdk:
 
@@ -55,6 +54,8 @@ class Sdk:
 
         return query
 
+
+
     def query(self, config, limit=1000):
 
         query_content = self._get_query_content(config.get('properties', []),
@@ -101,10 +102,8 @@ class Sdk:
             job_status = self.job_detail.get_job_status(job_resp['links'][0]['href'])
 
             if job_status['status'] == 'SUCCEEDED':
-                print(job_status)
                 return self.export_data.get_export_data(job_status['result']['exportResult'])
             elif job_status['status'] in ('FAILED', 'TIMED_OUT', 'ABORTED'):
-                print(job_status)
-                raise Exception(job_status['status'])
+                raise Exception(job_status)
 
             time.sleep(5)
