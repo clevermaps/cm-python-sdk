@@ -26,7 +26,7 @@ class Client:
             resp = self.make_request(method='post', url='/rest/oauth/token', data=data, headers=headers)
         except requests.exceptions.HTTPError as ex:
             if ex.response.status_code == 401:
-                raise exceptions.CleverMapsException('Verification of the access token was not successful. Please check if the access token value is valid.')
+                raise exceptions.AccessTokenException('Verification of the access token was not successful. Please check if the access token value is valid.')
         except Exception as ex:
             raise ex
 
