@@ -30,15 +30,16 @@ class Sdk:
             self.projects = projects.Projects(self.client)
             self.project = projects.Project(self.client)
 
-    def _get_query_content(self, properties_names, metric_names, filter_by):
+    def _get_query_content(self, properties_names, metric_names, filter_by, validate=True):
 
-        invalid_props = self._validate_query_properties(properties_names)
-        invalid_metrics = self._validate_query_metrics(metric_names)
-        invalid_filter_props = self._validate_query_properties([f['property'] for f in filter_by])
+        if validate:
+            invalid_props = self._validate_query_properties(properties_names)
+            invalid_metrics = self._validate_query_metrics(metric_names)
+            invalid_filter_props = self._validate_query_properties([f['property'] for f in filter_by])
 
-        if invalid_props or invalid_metrics or invalid_filter_props:
-            raise InvalidDwhQueryException('Query definition is invalid. Invalid properties: {}. Invalid metrics: {}. Invalid filter properties: {}.'.format(
-                    invalid_props, invalid_metrics, invalid_filter_props))
+            if invalid_props or invalid_metrics or invalid_filter_props:
+                raise InvalidDwhQueryException('Query definition is invalid. Invalid properties: {}. Invalid metrics: {}. Invalid filter properties: {}.'.format(
+                        invalid_props, invalid_metrics, invalid_filter_props))
 
         metrics = []
         for m in metric_names:
@@ -91,13 +92,13 @@ class Sdk:
 
         return invalid_props
 
-    def query(self, config, limit=1000):
+    def query(self, config, limit=1000, validate=True):
 
         props = config.get('properties', [])
         metrics = config.get('metrics', [])
         filter_by = config.get('filter_by', [])
 
-        query_content = self._get_query_content(props, metrics, filter_by)
+        query_content = self._get_query_content(props, metrics, filter_by, validate)
 
         location = self.queries.accept_queries(query_content, limit)
         res = self.queries.get_queries(location)
