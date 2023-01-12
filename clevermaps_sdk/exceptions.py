@@ -15,3 +15,7 @@ class ExportException(CleverMapsSdkException):
 class InvalidDwhQueryException(CleverMapsSdkException):
     """Raised in case of invalid Datawarehouse Query"""
     pass
+
+class InvalidProjectException(CleverMapsSdkException):
+    """Raised in case of invalid project"""
+    pass
