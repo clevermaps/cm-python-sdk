@@ -73,4 +73,3 @@ class Client:
             return pages[0]
         else:
             return pages
-

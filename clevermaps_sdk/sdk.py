@@ -2,7 +2,7 @@ import time
 from collections import OrderedDict
 from . import dwh, jobs, export, metadata, search, client, projects
 
-from .exceptions import ExportException, InvalidDwhQueryException
+from .exceptions import ExportException, InvalidDwhQueryException, InvalidProjectException
 
 
 class Sdk:
@@ -17,6 +17,11 @@ class Sdk:
 
             self.projects = projects.Projects(self.client)
             self.project = projects.Project(self.client)
+
+            projects_list = self.projects.Projects(client).list_projects()
+            if project_id not in [p['id'] for p in projects_list]:
+                raise InvalidProjectException('CleverMaps project_id {} is not valid value.'.format(project_id))
+
             self.queries = dwh.Queries(self.client, self.project_id)
             self.property_values = dwh.PropertyValues(self.client, self.project_id)
             self.available_datasets = dwh.AvailableDatasets(self.client, self.project_id)
