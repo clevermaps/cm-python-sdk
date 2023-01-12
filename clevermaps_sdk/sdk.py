@@ -18,7 +18,7 @@ class Sdk:
             self.projects = projects.Projects(self.client)
             self.project = projects.Project(self.client)
 
-            projects_list = self.projects.Projects(client).list_projects()
+            projects_list = self.projects.list_projects()
             if project_id not in [p['id'] for p in projects_list]:
                 raise InvalidProjectException('CleverMaps project_id {} is not valid value.'.format(project_id))
 
