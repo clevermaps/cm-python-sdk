@@ -8,7 +8,7 @@ class Projects():
     def list_projects(self):
 
         url = '/rest/projects'
-        resp = self.client.make_request('get', url=url)
+        resp = self.client.make_request_page('get', url=url)
 
         projects = []
 

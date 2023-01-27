@@ -64,12 +64,13 @@ class Client:
                 next_page = self.http_request(method=method, url='{}/?page={}'.format(url, page), data=data, params={}, headers=headers)
                 yield next_page
 
-    def make_request(self, method, url, data={}, headers={}):
+
+    def make_request_page(self, method, url, data={}, headers={}):
 
         pages = self.paginate(method, url, data, headers)
 
-        pages = list(pages)
-        if len(pages) == 1:
-            return pages[0]
-        else:
-            return pages
+        return list(pages)
+
+    def make_request(self, method, url, data={}, headers={}):
+
+        return self.http_request(method=method, url=url, data=data, params={}, headers=headers)
