@@ -7,7 +7,14 @@ from .exceptions import ExportException, InvalidDwhQueryException, InvalidProjec
 
 class Sdk:
 
-    def __init__(self, access_token, project_id=None, server_url="https://secure.clevermaps.io"):
+    def __init__(self, access_token, project_id=None, server_url=None):
+
+        valid_urls = ["https://secure.clevermaps.io", "https://staging.clevermaps.io"]
+
+        if not server_url:
+            server_url = valid_urls[0]
+        elif server_url and server_url not in valid_urls:
+            server_url = valid_urls[0]
 
         self.client = client.Client(access_token, server_url)
 
