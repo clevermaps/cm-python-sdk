@@ -12,10 +12,14 @@ class Queries(base.Base):
 
     def get_queries(self, location):
 
-        # TODO muze vratit 404, pak cekat dalsich 30s a zkusit znovu
-        resp = self.client.make_request('get', url=location)
+        resp = self.client.make_request_page('get', url=location)
 
-        return resp.json()
+        results = []
+        for page in resp:
+            content = page.json()['content']
+            results.extend(content)
+
+        return results
 
 
 class AvailableDatasets(base.Base):

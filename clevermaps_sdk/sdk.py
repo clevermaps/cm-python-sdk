@@ -115,16 +115,14 @@ class Sdk:
         location = self.queries.accept_queries(query_content, limit)
         res = self.queries.get_queries(location)
 
-        res_content = res['content']
-
         # Response does not preserve properties order, fix it back
         props_order = [p['id'] for p in query_content['properties']]
 
-        res_content_ordered = []
-        for r in res_content:
-            res_content_ordered.append(dict(OrderedDict((k, r['content'][k]) for k in props_order)))
+        res_reordered = []
+        for r in res:
+            res_reordered.append(dict(OrderedDict((k, r['content'][k]) for k in props_order)))
 
-        return res_content_ordered
+        return res_reordered
 
     def get_property_values(self, property_name):
 
