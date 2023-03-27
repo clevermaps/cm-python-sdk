@@ -25,9 +25,9 @@ class Sdk:
             self.projects = projects.Projects(self.client)
             self.project = projects.Project(self.client)
 
-            projects_list = self.projects.list_projects()
-            if project_id not in [p['id'] for p in projects_list]:
-                raise InvalidProjectException('CleverMaps project_id {} is not valid value.'.format(project_id))
+            projects_ids = [p['id'] for p in self.projects.list_projects()]
+            if project_id not in projects_ids:
+                raise InvalidProjectException('CleverMaps project_id {} is not valid value or the provided token has no access into that project. Available projects: {}'.format(project_id, projects_ids))
 
             self.queries = dwh.Queries(self.client, self.project_id)
             self.property_values = dwh.PropertyValues(self.client, self.project_id)
