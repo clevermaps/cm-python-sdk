@@ -7,7 +7,7 @@ class Jobs(base.Base):
 
         url = '/rest/jobs'
 
-        data = {
+        params = {
           "type": 'export',
           "projectId": self.project_id,
           "headerTitles": False,
@@ -24,7 +24,7 @@ class Jobs(base.Base):
           }
         }
 
-        resp = self.client.make_request('post', url=url, data=data)
+        resp = self.client.make_request('post', url=url, params=params)
 
         return resp.json()
 

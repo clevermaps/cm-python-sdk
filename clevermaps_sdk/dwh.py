@@ -6,7 +6,7 @@ class Queries(base.Base):
     def accept_queries(self, query, size=200):
 
         url = '{}/queries?page=0&size={}'.format(self.dwh_url, size)
-        resp = self.client.make_request('post', url=url, data=query)
+        resp = self.client.make_request('post', url=url, params=query)
 
         return resp.headers['location']
 
@@ -28,7 +28,7 @@ class AvailableDatasets(base.Base):
 
         url = '{}/availableDatasets?expand=dataset'.format(self.dwh_url)
 
-        data = {
+        params = {
             "metrics": [
                 {
                     "id": metric_name,
@@ -38,7 +38,7 @@ class AvailableDatasets(base.Base):
             ]
         }
 
-        resp = self.client.make_request('post', url=url, data=data)
+        resp = self.client.make_request('post', url=url, params=params)
 
         return resp.json()
 
@@ -55,7 +55,6 @@ class PropertyValues(base.Base):
 
     def get_property_values(self, location):
 
-        # TODO muze vratit 404, pak cekat dalsich 30s a zkusit znovu
         resp = self.client.make_request('get', url=location)
 
         return resp.json()

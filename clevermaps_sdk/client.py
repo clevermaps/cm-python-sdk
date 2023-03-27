@@ -12,7 +12,7 @@ class Client:
 
     def _get_token(self, access_token):
 
-        data = {
+        params = {
             "refresh_token": access_token
         }
 
@@ -23,7 +23,7 @@ class Client:
         }
 
         try:
-            resp = self.make_request(method='post', url='/rest/oauth/token', data=data, headers=headers)
+            resp = self.make_request(method='post', url='/rest/oauth/token', params=params, headers=headers)
         except requests.exceptions.HTTPError as ex:
             if ex.response.status_code == 401:
                 raise AccessTokenException('Verification of the access token was not successful. Please check if the access token value is valid.')
@@ -33,7 +33,7 @@ class Client:
         return resp.json()['access_token']
 
 
-    def http_request(self, method, url, data, params, headers):
+    def http_request(self, method, url, params, headers):
 
         if not headers:
             headers = {
@@ -44,33 +44,34 @@ class Client:
             }
 
         if method == 'post':
-            resp = requests.post(url='{}{}'.format(self.base_url, url), data=json.dumps(data), headers=headers)
+            resp = requests.post(url='{}{}'.format(self.base_url, url), data=json.dumps(params), headers=headers)
         elif method == 'get':
-            resp = requests.get(url='{}{}'.format(self.base_url, url), params=json.dumps(params), headers=headers)
+            #resp = requests.get(url='{}{}'.format(self.base_url, url), params=json.dumps(params), headers=headers)
+            resp = requests.get(url='{}{}'.format(self.base_url, url), params=params, headers=headers)
 
         resp.raise_for_status()
 
         return resp
 
-    def paginate(self, method, url, data, headers):
+    def paginate(self, method, url, params, headers):
 
-        first_page = self.http_request(method=method, url=url, data=data, params={}, headers=headers)
+        first_page = self.http_request(method=method, url=url, params=params, headers=headers)
         yield first_page
 
-        if 'application/json' in first_page.headers.get('Content-Type', '') and 'page' in first_page.json():
-            num_pages = first_page.json()['page']['totalPages']
+        links = first_page.json()['links']
+        while [l for l in links if l['rel'] == 'next']:
+            next_url = next(l['href'] for l in links if l['rel'] == 'next')
+            next_page = self.http_request(method=method, url=next_url, params=params, headers=headers)
+            links = next_page.json()['links']
+            yield next_page
 
-            for page in range(2, num_pages + 1):
-                next_page = self.http_request(method=method, url='{}/?page={}'.format(url, page), data=data, params={}, headers=headers)
-                yield next_page
 
+    def make_request_page(self, method, url, params={}, headers={}):
 
-    def make_request_page(self, method, url, data={}, headers={}):
-
-        pages = self.paginate(method, url, data, headers)
+        pages = self.paginate(method, url, params, headers)
 
         return list(pages)
 
-    def make_request(self, method, url, data={}, headers={}):
+    def make_request(self, method, url, params={}, headers={}):
 
-        return self.http_request(method=method, url=url, data=data, params={}, headers=headers)
+        return self.http_request(method=method, url=url, params=params, headers=headers)
