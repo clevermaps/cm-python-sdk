@@ -10,13 +10,13 @@ class Projects():
         url = '/rest/projects'
         resp = self.client.make_request_page('get', url=url)
 
-        projects = []
+        results = []
 
         for page in resp:
             content = page.json()['content']
-            projects.extend(content)
+            results.extend(content)
 
-        return projects
+        return results
 
 class Project():
 

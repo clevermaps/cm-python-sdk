@@ -4,7 +4,7 @@ The `clevermaps-python-sdk` package provides a convenient way to interact with C
 
 The package can be used in following use cases:
 * Custom data apps
-* Custom data processing components
+* Custom scientific notebooks
 * Custom data scripts
 
 Currently supported functions:
@@ -22,7 +22,7 @@ Currently supported functions:
 
 ## Requirements
 
--  CleverMaps project (https://clevermaps-internal.atlassian.net/wiki/spaces/CDD/pages/7536865/Tutorial+1+Creating+a+project+and+visualizing+your+data)
+-  CleverMaps project (https://docs.clevermaps.io/docs/start-creating-projects-in-clevermaps)
 -  Python 3.7 or newer
 
 ## Installation

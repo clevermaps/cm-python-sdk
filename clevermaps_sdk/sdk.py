@@ -82,7 +82,9 @@ class Sdk:
 
         metrics_md = self.metrics.list_metrics()
 
-        return list(set(metrics).difference(set([m['name'] for m in metrics_md])))
+        metrics_diff = list(set(metrics).difference(set([m['name'] for m in metrics_md])))
+
+        return metrics_diff
 
     def _validate_query_properties(self, properties):
 
