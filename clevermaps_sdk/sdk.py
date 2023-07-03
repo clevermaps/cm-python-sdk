@@ -25,9 +25,10 @@ class Sdk:
             self.projects = projects.Projects(self.client)
             self.project = projects.Project(self.client)
 
-            projects_ids = [p['id'] for p in self.projects.list_projects()]
-            if project_id not in projects_ids:
-                raise InvalidProjectException('CleverMaps project_id {} is not valid value or the provided token has no access into that project. Available projects: {}'.format(project_id, projects_ids))
+            # Docasne deaktivovano, TODO debug proc dochazi k raise nahodile
+            # projects_ids = [p['id'] for p in self.projects.list_projects()]
+            # if project_id not in projects_ids:
+            #     raise InvalidProjectException('CleverMaps project_id {} is not valid value or the provided token has no access into that project. Available projects: {}'.format(project_id, projects_ids))
 
             self.queries = dwh.Queries(self.client, self.project_id)
             self.property_values = dwh.PropertyValues(self.client, self.project_id)
@@ -41,6 +42,7 @@ class Sdk:
         else:
             self.projects = projects.Projects(self.client)
             self.project = projects.Project(self.client)
+
 
     def _get_query_content(self, properties_names, metric_names, filter_by, validate=True):
 
