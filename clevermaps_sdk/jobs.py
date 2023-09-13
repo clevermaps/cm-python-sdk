@@ -27,6 +27,52 @@ class Jobs(base.Base):
         resp = self.client.make_request('post', url=url, params=params)
 
         return resp.json()
+    
+    
+    def start_new_data_pull_job(self, dataset, mode, upload_link, csv_options={}):
+        
+        url = '/rest/jobs'
+
+        if not csv_options:
+            csv_options = {
+              "header": True,
+              "separator": ",",
+              "quote": "\"",
+              "escape": "\\"
+            }
+
+        params = {
+          "type": "dataPull",
+          "projectId": self.project_id,
+          "content": {
+            "dataset": dataset,
+            "mode": mode,
+            "upload": upload_link,
+            "type": "csv",
+            "csvOptions": csv_options
+          }
+        }
+
+        resp = self.client.make_request('post', url=url, params=params)
+
+        return resp.json()
+    
+    
+    def start_new_data_dump_job(self, dataset):
+        
+        url = '/rest/jobs'
+
+        params = {
+          "type": "dataDump",
+          "projectId": self.project_id,
+          "content": {
+            "dataset": dataset
+          }
+        }
+
+        resp = self.client.make_request('post', url=url, params=params)
+
+        return resp.json()
 
 
 class JobDetail(base.Base):

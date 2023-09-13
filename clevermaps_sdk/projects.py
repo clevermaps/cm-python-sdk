@@ -1,5 +1,5 @@
 
-class Projects():
+class Projects:
 
     def __init__(self, client):
 
@@ -18,7 +18,7 @@ class Projects():
 
         return results
 
-class Project():
+class Project:
 
     def __init__(self, client):
 

@@ -11,4 +11,6 @@ class ExportData(base.Base):
         }
         resp = self.client.make_request('get', url=export_url, headers=headers)
 
+        resp.encoding = 'utf-8'
+
         return resp.text

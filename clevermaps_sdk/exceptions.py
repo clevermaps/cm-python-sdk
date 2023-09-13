@@ -19,3 +19,11 @@ class InvalidDwhQueryException(CleverMapsSdkException):
 class InvalidProjectException(CleverMapsSdkException):
     """Raised in case of invalid project"""
     pass
+
+class DataUploadException(CleverMapsSdkException):
+    """Raised in case of failed data upload"""
+    pass
+
+class DataDumpException(CleverMapsSdkException):
+    """Raised in case of failed data dump"""
+    pass

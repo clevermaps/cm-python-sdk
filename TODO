@@ -1,4 +1,5 @@
-pagination
+drzet stejnou strukturu jako na apiary - napr. nemam Metadata
+
 logging
 unit tests
 custom exceptions

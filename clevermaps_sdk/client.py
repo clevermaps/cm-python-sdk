@@ -1,5 +1,6 @@
 import json
 import requests
+from urllib.parse import urlparse
 
 from .exceptions import AccessTokenException
 
@@ -9,6 +10,7 @@ class Client:
 
         self.base_url = server_url
         self.bearer_token = self._get_token(access_token)
+        
 
     def _get_token(self, access_token):
 
@@ -43,15 +45,19 @@ class Client:
                 "User-Agent": "CleverMaps Python SDK"
             }
 
+        url='{}{}'.format(self.base_url, url) if not bool(urlparse(url).netloc) else url
+
         if method == 'post':
-            resp = requests.post(url='{}{}'.format(self.base_url, url), data=json.dumps(params), headers=headers)
+            resp = requests.post(url, data=json.dumps(params), headers=headers)
         elif method == 'get':
-            #resp = requests.get(url='{}{}'.format(self.base_url, url), params=json.dumps(params), headers=headers)
-            resp = requests.get(url='{}{}'.format(self.base_url, url), params=params, headers=headers)
+            resp = requests.get(url, params=params, headers=headers)
+        elif method == 'put':
+            resp = requests.put(url, data=params, headers=headers)
 
         resp.raise_for_status()
 
         return resp
+    
 
     def paginate(self, method, url, params, headers):
 
@@ -71,6 +77,7 @@ class Client:
         pages = self.paginate(method, url, params, headers)
 
         return list(pages)
+    
 
     def make_request(self, method, url, params={}, headers={}):
 

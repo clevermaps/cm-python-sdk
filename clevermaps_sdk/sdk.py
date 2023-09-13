@@ -2,7 +2,7 @@ import time
 from collections import OrderedDict
 from . import dwh, jobs, export, metadata, search, client, projects
 
-from .exceptions import ExportException, InvalidDwhQueryException, InvalidProjectException
+from .exceptions import ExportException, InvalidDwhQueryException, DataUploadException, DataDumpException
 
 
 class Sdk:
@@ -25,14 +25,10 @@ class Sdk:
             self.projects = projects.Projects(self.client)
             self.project = projects.Project(self.client)
 
-            # Docasne deaktivovano, TODO debug proc dochazi k raise nahodile
-            # projects_ids = [p['id'] for p in self.projects.list_projects()]
-            # if project_id not in projects_ids:
-            #     raise InvalidProjectException('CleverMaps project_id {} is not valid value or the provided token has no access into that project. Available projects: {}'.format(project_id, projects_ids))
-
             self.queries = dwh.Queries(self.client, self.project_id)
             self.property_values = dwh.PropertyValues(self.client, self.project_id)
             self.available_datasets = dwh.AvailableDatasets(self.client, self.project_id)
+            self.data_upload = dwh.DataUpload(self.client, self.project_id)
             self.jobs = jobs.Jobs(self.client, self.project_id)
             self.job_detail = jobs.JobDetail(self.client, self.project_id)
             self.export_data = export.ExportData(self.client, self.project_id)
@@ -79,6 +75,7 @@ class Sdk:
         }
 
         return query
+    
 
     def _validate_query_metrics(self, metrics):
 
@@ -87,6 +84,7 @@ class Sdk:
         metrics_diff = list(set(metrics).difference(set([m['name'] for m in metrics_md])))
 
         return metrics_diff
+    
 
     def _validate_query_properties(self, properties):
 
@@ -107,6 +105,7 @@ class Sdk:
                 invalid_props.append(prop)
 
         return invalid_props
+    
 
     def query(self, config, limit=1000, validate=True):
 
@@ -115,6 +114,7 @@ class Sdk:
         filter_by = config.get('filter_by', [])
 
         query_content = self._get_query_content(props, metrics, filter_by, validate)
+        print(query_content)
 
         location = self.queries.accept_queries(query_content, limit)
         res = self.queries.get_queries(location)
@@ -127,6 +127,7 @@ class Sdk:
             res_reordered.append(dict(OrderedDict((k, r['content'][k]) for k in props_order)))
 
         return res_reordered
+    
 
     def get_property_values(self, property_name):
 
@@ -134,6 +135,7 @@ class Sdk:
         res = self.property_values.get_property_values(location)
 
         return res['content']
+    
 
     def get_available_datasets(self, metric_name):
 
@@ -141,6 +143,7 @@ class Sdk:
         datasets = [dataset['name'] for dataset in res['content'][0]['availableDatasets'] if dataset]
 
         return datasets
+    
 
     def export_to_csv(self, config):
 
@@ -159,3 +162,38 @@ class Sdk:
                 raise ExportException(job_status)
 
             time.sleep(5)
+
+
+    def upload_data(self, dataset, mode, file, csv_options={}):
+
+        upload_link = self.data_upload.upload(file)
+
+        job_resp = self.jobs.start_new_data_pull_job(dataset, mode, upload_link, csv_options)
+
+        while True:
+            job_status = self.job_detail.get_job_status(job_resp['links'][0]['href'])
+            print(job_status)
+
+            if job_status['status'] == 'SUCCEEDED':
+                return job_status
+            elif job_status['status'] in ('FAILED', 'TIMED_OUT', 'ABORTED'):
+                raise DataUploadException(job_status)
+
+            time.sleep(5)
+
+
+    def dump_data(self, dataset):
+
+        job_resp = self.jobs.start_new_data_dump_job(dataset)
+
+        while True:
+            job_status = self.job_detail.get_job_status(job_resp['links'][0]['href'])
+            print(job_status)
+
+            if job_status['status'] == 'SUCCEEDED':
+                return self.export_data.get_export_data(job_status['result']['links'][0]['href'])
+            elif job_status['status'] in ('FAILED', 'TIMED_OUT', 'ABORTED'):
+                raise DataDumpException(job_status)
+
+            time.sleep(5)
+

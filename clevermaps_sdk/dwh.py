@@ -1,5 +1,6 @@
 from . import base
-
+import os
+import io
 
 class Queries(base.Base):
 
@@ -58,3 +59,33 @@ class PropertyValues(base.Base):
         resp = self.client.make_request('get', url=location)
 
         return resp.json()
+
+
+class DataUpload(base.Base):
+
+    def upload(self, file):
+
+        if not isinstance(file, io.IOBase):
+            if not os.path.isfile(file):
+                raise FileNotFoundError
+            else:
+                file_obj = open(file, 'rb')
+        else:
+            file_obj = file
+
+        url = '/rest/projects/{}/dwh/data/uploads'.format(self.project_id)
+
+        resp = self.client.make_request('post', url=url, params=None)
+
+        upload_url = resp.json()['uploadUrlEncoded']
+        upload_link = list(filter(lambda l: l['rel'] == 'self', resp.json()['links']))[0]['href']
+
+        headers = {
+            'Content-type': 'text/csv',
+            'Charset': 'utf-8'
+        }
+
+        resp = self.client.make_request('put', url=upload_url, params=file_obj, headers=headers)
+
+        return upload_link
+

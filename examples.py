@@ -70,3 +70,18 @@ print(cm_sdk.datasets.list_datasets())
 
 # Fulltext search in dataset
 print(cm_sdk.search.search('poi_dwh', 'Albert'))
+
+# Upload CSV file to CleverMaps
+csv_options = {
+    "header": True,
+    "separator": ",",
+    "quote": "\"",
+    "escape": "\\"
+}
+with open('./data/poi_dwh.csv', 'rb') as f:
+    print(cm_sdk.upload_data('poi_dwh', 'full', f, csv_options))
+
+# Dump CSV file from CleverMaps
+dump_result = cm_sdk.dump_data('poi_dwh')
+with open('./data/poi_dwh_dump.csv', 'w') as outf:
+    outf.write(dump_result)
