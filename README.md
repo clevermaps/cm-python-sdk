@@ -19,11 +19,13 @@ Currently supported functions:
 * Get dataset metadata
 * List projects
 * Get project metadata
+* Data upload
+* Data dump
 
 ## Requirements
 
 -  CleverMaps project (https://docs.clevermaps.io/docs/start-creating-projects-in-clevermaps)
--  Python 3.7 or newer
+-  Python 3.10 or newer
 
 ## Installation
 
