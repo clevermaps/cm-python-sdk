@@ -85,3 +85,19 @@ with open('./data/poi_dwh.csv', 'rb') as f:
 dump_result = cm_sdk.dump_data('poi_dwh')
 with open('./data/poi_dwh_dump.csv', 'w') as outf:
     outf.write(dump_result)
+
+# Update metadata
+metric_update_json = {
+    'description': 'New description'
+}
+print(cm_sdk.metrics.update_metric('pois_sum_metric', metric_update_json))
+
+view_update_json = {
+    'description': 'New description'
+}
+print(cm_sdk.views.update_view('exposure_index_view', view_update_json))
+
+dataset_update_json = {
+    'description': 'New description'
+}
+print(cm_sdk.datasets.update_dataset('poi_dwh', dataset_update_json))

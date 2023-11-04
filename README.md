@@ -12,14 +12,11 @@ Currently supported functions:
 * Export data and metrics
 * Fulltext search in the dataset
 * Get distinct property values
-* Get available datasets for the metric
-* List metrics
-* Get metric metadata
-* List datasets
-* Get dataset metadata
-* List projects
-* Get project metadata
-* Data upload
+* Get available datasets
+* List metadata
+* Get metadata
+* Update metadata
+* Data load
 * Data dump
 
 ## Requirements
@@ -40,3 +37,4 @@ Check `examples.py`
 ## Changelog
 
 0.0.1 Initial version
+0.0.2 Data load/dump; Metada update;

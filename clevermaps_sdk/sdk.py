@@ -32,9 +32,10 @@ class Sdk:
             self.jobs = jobs.Jobs(self.client, self.project_id)
             self.job_detail = jobs.JobDetail(self.client, self.project_id)
             self.export_data = export.ExportData(self.client, self.project_id)
+            self.search = search.Search(self.client, self.project_id)
             self.metrics = metadata.Metrics(self.client, self.project_id)
             self.datasets = metadata.Datasets(self.client, self.project_id)
-            self.search = search.Search(self.client, self.project_id)
+            self.views = metadata.Views(self.client, self.project_id)
         else:
             self.projects = projects.Projects(self.client)
             self.project = projects.Project(self.client)
