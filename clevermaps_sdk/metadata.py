@@ -1,5 +1,6 @@
 from . import base
 import json
+from pydantic.utils import deep_update
 
 
 class Metadata(base.Base):
@@ -28,7 +29,8 @@ class Metadata(base.Base):
 
         http_etag = get_metadata_resp.headers['ETag']
         metadata_json = get_metadata_resp.json()
-        metadata_json.update(update_metadata_json)
+        #metadata_json.update(update_metadata_json)
+        metadata_json = deep_update(metadata_json, update_metadata_json)
 
         headers = {
             "Authorization": "Bearer {}".format(self.client.bearer_token),
