@@ -61,6 +61,22 @@ class PropertyValues(base.Base):
         return resp.json()
 
 
+class MetricRanges(base.Base):
+
+    def accept_metric_ranges(self, query):
+
+        url = '{}/metricRanges'.format(self.dwh_url)
+        resp = self.client.make_request('post', url=url, params=query)
+
+        return resp.headers['location']
+
+    def get_metric_ranges(self, location):
+
+        resp = self.client.make_request('get', url=location)
+
+        return resp.json()
+
+
 class DataUpload(base.Base):
 
     def upload(self, file):

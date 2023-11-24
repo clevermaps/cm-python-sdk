@@ -27,6 +27,7 @@ class Sdk:
 
             self.queries = dwh.Queries(self.client, self.project_id)
             self.property_values = dwh.PropertyValues(self.client, self.project_id)
+            self.metric_ranges = dwh.MetricRanges(self.client, self.project_id)
             self.available_datasets = dwh.AvailableDatasets(self.client, self.project_id)
             self.data_upload = dwh.DataUpload(self.client, self.project_id)
             self.jobs = jobs.Jobs(self.client, self.project_id)
@@ -115,7 +116,7 @@ class Sdk:
         filter_by = config.get('filter_by', [])
 
         query_content = self._get_query_content(props, metrics, filter_by, validate)
-        print(query_content)
+        #print(query_content)
 
         location = self.queries.accept_queries(query_content, limit)
         res = self.queries.get_queries(location)
@@ -137,6 +138,19 @@ class Sdk:
 
         return res['content']
     
+    def get_metric_ranges(self, query):
+
+        props = query.get('properties', [])
+        metrics = query.get('metrics', [])
+        filter_by = query.get('filter_by', [])
+
+        query_content = self._get_query_content(props, metrics, filter_by, validate=True)
+
+        location = self.metric_ranges.accept_metric_ranges(query_content)
+        res = self.metric_ranges.get_metric_ranges(location)
+
+        return res['content']
+    
 
     def get_available_datasets(self, metric_name):
 
@@ -150,7 +164,8 @@ class Sdk:
 
         query_content = self._get_query_content(config['query'].get('properties', []),
                                                 config['query'].get('metrics', []),
-                                                config['query'].get('filter_by', []))
+                                                config['query'].get('filter_by', []),
+                                                validate=False)
 
         job_resp = self.jobs.start_new_export_job(query_content, config['filename'], config['format'])
 
