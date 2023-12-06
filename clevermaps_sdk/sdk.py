@@ -1,6 +1,6 @@
 import time
 from collections import OrderedDict
-from . import dwh, jobs, export, metadata, search, client, projects
+from . import dwh, jobs, export, metadata, search, client, projects, auditlog
 
 from .exceptions import ExportException, InvalidDwhQueryException, DataUploadException, DataDumpException
 
@@ -25,6 +25,8 @@ class Sdk:
             self.projects = projects.Projects(self.client)
             self.project = projects.Project(self.client)
 
+            # TODO drzet strukturu i tady? napr. self.dwh.*, self.metadata.* apod?
+
             self.queries = dwh.Queries(self.client, self.project_id)
             self.property_values = dwh.PropertyValues(self.client, self.project_id)
             self.metric_ranges = dwh.MetricRanges(self.client, self.project_id)
@@ -37,6 +39,7 @@ class Sdk:
             self.metrics = metadata.Metrics(self.client, self.project_id)
             self.datasets = metadata.Datasets(self.client, self.project_id)
             self.views = metadata.Views(self.client, self.project_id)
+            self.auditlog = auditlog.AuditLog(self.client, self.project_id)
         else:
             self.projects = projects.Projects(self.client)
             self.project = projects.Project(self.client)

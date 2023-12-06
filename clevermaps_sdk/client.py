@@ -67,7 +67,7 @@ class Client:
         links = first_page.json()['links']
         while [l for l in links if l['rel'] == 'next']:
             next_url = next(l['href'] for l in links if l['rel'] == 'next')
-            next_page = self.http_request(method=method, url=next_url, params=params, headers=headers)
+            next_page = self.http_request(method=method, url=next_url, params={}, headers=headers)
             links = next_page.json()['links']
             yield next_page
 
