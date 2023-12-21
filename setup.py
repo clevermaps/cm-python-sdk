@@ -8,7 +8,8 @@ setuptools.setup(
     description="Python SDK client for the CleverMaps API",
     packages=setuptools.find_packages(),
     install_requires=[
-        'requests>=2.30.0'
+        'requests>=2.30.0',
+        'pydantic>=2.0.0'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
