@@ -7,7 +7,7 @@ from .exceptions import ExportException, InvalidDwhQueryException, DataUploadExc
 
 class Sdk:
 
-    def __init__(self, access_token, project_id=None, server_url=None, max_retries=10):
+    def __init__(self, access_token, project_id=None, server_url=None, retry_count=12, retry_wait=5):
 
         valid_urls = ["https://secure.clevermaps.io", "https://staging.clevermaps.io"]
 
@@ -16,7 +16,7 @@ class Sdk:
         elif server_url and server_url not in valid_urls:
             server_url = valid_urls[0]
 
-        self.client = client.Client(access_token, server_url, max_retries)
+        self.client = client.Client(access_token, server_url, retry_count, retry_wait)
 
         if project_id:
 
