@@ -1,6 +1,7 @@
 import json
 import requests
 from urllib.parse import urlparse
+from tenacity import retry, stop_after_attempt, wait_fixed
 
 from .exceptions import AccessTokenException
 
@@ -35,7 +36,13 @@ class Client:
         return resp.json()['access_token']
 
 
+    @retry(
+        stop=stop_after_attempt(6), # Maximum number of retries
+        wait=wait_fixed(10) # Exponential backoff
+    )
     def http_request(self, method, url, params, headers):
+
+        session = requests.Session()
 
         if not headers:
             headers = {
@@ -48,11 +55,11 @@ class Client:
         url='{}{}'.format(self.base_url, url) if not bool(urlparse(url).netloc) else url
 
         if method == 'post':
-            resp = requests.post(url, data=json.dumps(params), headers=headers)
+            resp = session.post(url, data=json.dumps(params), headers=headers)
         elif method == 'get':
-            resp = requests.get(url, params=params, headers=headers)
+            resp = session.get(url, params=params, headers=headers)
         elif method == 'put':
-            resp = requests.put(url, data=params, headers=headers)
+            resp = session.put(url, data=params, headers=headers)
 
         resp.raise_for_status()
 
