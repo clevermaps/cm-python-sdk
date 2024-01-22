@@ -7,7 +7,7 @@ from .exceptions import ExportException, InvalidDwhQueryException, DataUploadExc
 
 class Sdk:
 
-    def __init__(self, access_token, project_id=None, server_url=None):
+    def __init__(self, access_token, project_id=None, server_url=None, max_retries=10):
 
         valid_urls = ["https://secure.clevermaps.io", "https://staging.clevermaps.io"]
 
@@ -16,7 +16,7 @@ class Sdk:
         elif server_url and server_url not in valid_urls:
             server_url = valid_urls[0]
 
-        self.client = client.Client(access_token, server_url)
+        self.client = client.Client(access_token, server_url, max_retries)
 
         if project_id:
 
@@ -119,11 +119,10 @@ class Sdk:
         filter_by = config.get('filter_by', [])
 
         query_content = self._get_query_content(props, metrics, filter_by, validate)
-        #print(query_content)
 
         location = self.queries.accept_queries(query_content, limit)
         res = self.queries.get_queries(location)
-
+        
         # Response does not preserve properties order, fix it back
         props_order = [p['id'] for p in query_content['properties']]
 

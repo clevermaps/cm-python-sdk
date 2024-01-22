@@ -1,16 +1,22 @@
 import json
 import requests
 from urllib.parse import urlparse
-from tenacity import retry, stop_after_attempt, wait_fixed
+from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_exception_type
 
 from .exceptions import AccessTokenException
 
+RETRY_COUNT = 0
+RETRY_WAIT = 0
+
 class Client:
 
-    def __init__(self, access_token, server_url):
+    def __init__(self, access_token, server_url, retry_count=12, retry_wait=5):
 
         self.base_url = server_url
         self.bearer_token = self._get_token(access_token)
+
+        RETRY_COUNT = retry_count
+        RETRY_WAIT = retry_wait
         
 
     def _get_token(self, access_token):
@@ -37,8 +43,9 @@ class Client:
 
 
     @retry(
-        stop=stop_after_attempt(6), # Maximum number of retries
-        wait=wait_fixed(10) # Exponential backoff
+        stop=stop_after_attempt(RETRY_COUNT),
+        wait=wait_fixed(RETRY_WAIT),
+        retry=retry_if_exception_type(requests.exceptions.HTTPError)
     )
     def http_request(self, method, url, params, headers):
 
