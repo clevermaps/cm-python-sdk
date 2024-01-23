@@ -1,7 +1,7 @@
 import json
 import requests
 from urllib.parse import urlparse
-from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_result
+from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_result, retry_all
 
 from .exceptions import AccessTokenException
 
@@ -39,26 +39,19 @@ class Client:
         return resp.json()['access_token']
     
 
-    def retry_if_result_is_code(self, result):
-        
-        retry_on_codes = [404]
-
-        retry = result.status_code in retry_on_codes
-
-        return retry
-    
-
-    def http_request_with_retry(self, method, url, params, headers):
+    def http_request_retry(self, method, url, params, headers, retry_enabled):
 
         http_retry = retry(
             stop=stop_after_attempt(self.retry_count),
             wait=wait_fixed(self.retry_wait),
-            retry=retry_if_result(self.retry_if_result_is_code)
+            retry=retry_if_result(lambda r: r.status_code in [404])
         )
 
-        http_request_retry = http_retry(self.http_request)
-
-        return http_request_retry(method, url, params, headers)
+        if retry_enabled:
+            http_request_retry = http_retry(self.http_request)
+            return http_request_retry(method, url, params, headers)
+        else:
+            return self.http_request(method, url, params, headers)
 
 
     def http_request(self, method, url, params, headers):
@@ -83,9 +76,9 @@ class Client:
         return resp
     
 
-    def paginate(self, method, url, params, headers):
+    def paginate(self, method, url, params, headers, retry_enabled):
 
-        first_page = self.http_request_with_retry(method=method, url=url, params=params, headers=headers)
+        first_page = self.http_request_retry(method=method, url=url, params=params, headers=headers, retry_enabled=retry_enabled)
         
         first_page.raise_for_status()
         yield first_page
@@ -93,22 +86,22 @@ class Client:
         links = first_page.json()['links']
         while [l for l in links if l['rel'] == 'next']:
             next_url = next(l['href'] for l in links if l['rel'] == 'next')
-            next_page = self.http_request_with_retry(method=method, url=next_url, params={}, headers=headers)
+            next_page = self.http_request_retry(method=method, url=next_url, params={}, headers=headers, retry_enabled=retry_enabled)
             next_page.raise_for_status()
             links = next_page.json()['links']
             yield next_page
 
 
-    def make_request_page(self, method, url, params={}, headers={}):
+    def make_request_page(self, method, url, params={}, headers={}, retry_enabled=False):
 
-        pages = self.paginate(method, url, params, headers)
+        pages = self.paginate(method, url, params, headers, retry_enabled=retry_enabled)
 
         return list(pages)
     
 
-    def make_request(self, method, url, params={}, headers={}):
+    def make_request(self, method, url, params={}, headers={}, retry_enabled=False):
 
-        resp = self.http_request_with_retry(method=method, url=url, params=params, headers=headers)
+        resp = self.http_request_retry(method=method, url=url, params=params, headers=headers, retry_enabled=retry_enabled)
 
         resp.raise_for_status()
 

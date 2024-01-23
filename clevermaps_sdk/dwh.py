@@ -13,7 +13,7 @@ class Queries(base.Base):
 
     def get_queries(self, location):
 
-        resp = self.client.make_request_page('get', url=location)
+        resp = self.client.make_request_page('get', url=location, retry_enabled=True)
 
         results = []
         for page in resp:
