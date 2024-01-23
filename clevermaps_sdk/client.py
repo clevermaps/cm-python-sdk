@@ -1,7 +1,7 @@
 import json
 import requests
 from urllib.parse import urlparse
-from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_exception_type
+from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_result
 
 from .exceptions import AccessTokenException
 
@@ -10,14 +10,13 @@ RETRY_WAIT = 0
 
 class Client:
 
-    def __init__(self, access_token, server_url, retry_count=12, retry_wait=5):
+    def __init__(self, access_token, server_url, retry_count, retry_wait):
 
         self.base_url = server_url
         self.bearer_token = self._get_token(access_token)
 
         RETRY_COUNT = retry_count
         RETRY_WAIT = retry_wait
-        
 
     def _get_token(self, access_token):
 
@@ -40,12 +39,19 @@ class Client:
             raise ex
 
         return resp.json()['access_token']
+    
 
+    def retry_if_result_is_code(result):
+        
+        retry_on_codes = [404]
+
+        return result.status_code in retry_on_codes
+    
 
     @retry(
         stop=stop_after_attempt(RETRY_COUNT),
         wait=wait_fixed(RETRY_WAIT),
-        retry=retry_if_exception_type(requests.exceptions.HTTPError)
+        retry=retry_if_result(retry_if_result_is_code)
     )
     def http_request(self, method, url, params, headers):
 
@@ -68,7 +74,7 @@ class Client:
         elif method == 'put':
             resp = session.put(url, data=params, headers=headers)
 
-        resp.raise_for_status()
+        #resp.raise_for_status()
 
         return resp
     
@@ -76,12 +82,14 @@ class Client:
     def paginate(self, method, url, params, headers):
 
         first_page = self.http_request(method=method, url=url, params=params, headers=headers)
+        first_page.raise_for_status()
         yield first_page
 
         links = first_page.json()['links']
         while [l for l in links if l['rel'] == 'next']:
             next_url = next(l['href'] for l in links if l['rel'] == 'next')
             next_page = self.http_request(method=method, url=next_url, params={}, headers=headers)
+            next_page.raise_for_status()
             links = next_page.json()['links']
             yield next_page
 
@@ -95,4 +103,8 @@ class Client:
 
     def make_request(self, method, url, params={}, headers={}):
 
-        return self.http_request(method=method, url=url, params=params, headers=headers)
+        resp = self.http_request(method=method, url=url, params=params, headers=headers)
+
+        resp.raise_for_status()
+
+        return resp
