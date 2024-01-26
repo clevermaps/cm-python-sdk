@@ -73,6 +73,24 @@ class Jobs(base.Base):
         resp = self.client.make_request('post', url=url, params=params)
 
         return resp.json()
+    
+    
+    def start_new_bulk_point_query_job(self, points, pointQueries):
+        
+        url = '/rest/jobs'
+
+        params = {
+            "type": "bulkPointQuery",
+            "projectId": self.project_id,
+            "content": {
+                "points": points,
+                "pointQueries": pointQueries
+            }
+        }
+
+        resp = self.client.make_request('post', url=url, params=params)
+
+        return resp.json()
 
 
 class JobDetail(base.Base):

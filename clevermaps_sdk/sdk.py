@@ -1,7 +1,8 @@
 import time
 from collections import OrderedDict
-from . import dwh, jobs, export, metadata, search, client, projects, auditlog
+from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_not_result
 
+from . import dwh, jobs, export, metadata, search, client, projects, auditlog
 from .exceptions import ExportException, InvalidDwhQueryException, DataUploadException, DataDumpException
 
 
@@ -141,6 +142,7 @@ class Sdk:
 
         return res['content']
     
+    
     def get_metric_ranges(self, query):
 
         props = query.get('properties', [])
@@ -163,6 +165,26 @@ class Sdk:
         return datasets
     
 
+    @retry(stop=stop_after_attempt(50), 
+           wait=wait_fixed(1),
+           retry=retry_if_not_result(lambda r: r['status'] == 'SUCCEEDED')
+    )
+    def get_job_result(self, link):
+
+        job_result = self.job_detail.get_job_status(link)
+
+        return job_result
+
+
+    def query_points(self, points, point_queries):
+
+        job_resp = self.jobs.start_new_bulk_point_query_job(points, point_queries)
+
+        job_result = self.get_job_result(job_resp['links'][0]['href'])
+
+        return job_result
+    
+
     def export_to_csv(self, config):
 
         query_content = self._get_query_content(config['query'].get('properties', []),
@@ -172,15 +194,19 @@ class Sdk:
 
         job_resp = self.jobs.start_new_export_job(query_content, config['filename'], config['format'])
 
-        while True:
-            job_status = self.job_detail.get_job_status(job_resp['links'][0]['href'])
+        job_result = self.get_job_result(job_resp['links'][0]['href'])
 
-            if job_status['status'] == 'SUCCEEDED':
-                return self.export_data.get_export_data(job_status['result']['exportResult'])
-            elif job_status['status'] in ('FAILED', 'TIMED_OUT', 'ABORTED'):
-                raise ExportException(job_status)
+        return self.export_data.get_export_data(job_result['result']['exportResult'])
 
-            time.sleep(5)
+        # while True:
+        #     job_status = self.job_detail.get_job_status(job_resp['links'][0]['href'])
+
+        #     if job_status['status'] == 'SUCCEEDED':
+        #         return self.export_data.get_export_data(job_status['result']['exportResult'])
+        #     elif job_status['status'] in ('FAILED', 'TIMED_OUT', 'ABORTED'):
+        #         raise ExportException(job_status)
+
+        #     time.sleep(5)
 
 
     def upload_data(self, dataset, mode, file, csv_options={}):

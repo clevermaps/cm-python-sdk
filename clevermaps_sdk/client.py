@@ -1,7 +1,7 @@
 import json
 import requests
 from urllib.parse import urlparse
-from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_result, retry_all
+from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_result
 
 from .exceptions import AccessTokenException
 
