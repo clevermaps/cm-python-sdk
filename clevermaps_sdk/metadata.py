@@ -71,6 +71,31 @@ class Metrics(Metadata):
         return self.update_metadata(resp, url, metric_update_json)
     
 
+class Indicators(Metadata):
+
+    def get_indicator_by_name(self, indicator_name):
+
+        url = '{}/indicator?name={}'.format(self.md_url, indicator_name)
+
+        return self.get_metadata(url)
+    
+
+    def list_indicators(self):
+
+        url = '{}/indicators'.format(self.md_url)
+
+        return self.list_metadata(url)
+    
+
+    def update_metric(self, indicator_name, indicator_update_json):
+
+        resp = self.get_indicator_by_name(indicator_name)
+
+        url = '{}/indicator/{}'.format(self.md_url, resp.json()['id'])
+
+        return self.update_metadata(resp, url, indicator_update_json)
+    
+
 class Views(Metadata):
 
     def get_view_by_name(self, view_name):
