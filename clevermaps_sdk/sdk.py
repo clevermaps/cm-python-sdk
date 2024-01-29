@@ -181,9 +181,8 @@ class Sdk:
         for q in point_queries:
             for m in q['properties']:
                 if m['type'] == 'metric' and not m['metric'].startswith('/rest'):
-                    m['name'] = "/rest/projects/{}/md/metrics?name={}".format(self.project_id, m['metric']) 
+                    m['metric'] = "/rest/projects/{}/md/metrics?name={}".format(self.project_id, m['metric']) 
 
-        print(point_queries)
 
         job_resp = self.jobs.start_new_bulk_point_query_job(points, point_queries)
 
