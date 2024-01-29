@@ -30,13 +30,12 @@ class Client:
 
         try:
             resp = self.make_request(method='post', url='/rest/oauth/token', params=params, headers=headers)
+            return resp.json()['access_token']
         except requests.exceptions.HTTPError as ex:
             if ex.response.status_code == 401:
                 raise AccessTokenException('Verification of the access token was not successful. Please check if the access token value is valid.')
         except Exception as ex:
             raise ex
-
-        return resp.json()['access_token']
     
 
     def http_request_retry(self, method, url, params, headers, retry_enabled):

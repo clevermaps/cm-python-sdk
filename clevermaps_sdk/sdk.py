@@ -178,6 +178,13 @@ class Sdk:
 
     def query_points(self, points, point_queries):
 
+        for q in point_queries:
+            for m in q['properties']:
+                if m['type'] == 'metric' and not m['metric'].startswith('/rest'):
+                    m['name'] = "/rest/projects/{}/md/metrics?name={}".format(self.project_id, m['metric']) 
+
+        print(point_queries)
+
         job_resp = self.jobs.start_new_bulk_point_query_job(points, point_queries)
 
         job_result = self.get_job_result(job_resp['links'][0]['href'])
@@ -197,16 +204,6 @@ class Sdk:
         job_result = self.get_job_result(job_resp['links'][0]['href'])
 
         return self.export_data.get_export_data(job_result['result']['exportResult'])
-
-        # while True:
-        #     job_status = self.job_detail.get_job_status(job_resp['links'][0]['href'])
-
-        #     if job_status['status'] == 'SUCCEEDED':
-        #         return self.export_data.get_export_data(job_status['result']['exportResult'])
-        #     elif job_status['status'] in ('FAILED', 'TIMED_OUT', 'ABORTED'):
-        #         raise ExportException(job_status)
-
-        #     time.sleep(5)
 
 
     def upload_data(self, dataset, mode, file, csv_options={}):
