@@ -1,129 +1,55 @@
-import time
 from collections import OrderedDict
-from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_not_result
 
-from . import dwh, jobs, export, metadata, search, client, projects, auditlog
-from .exceptions import ExportException, InvalidDwhQueryException, DataUploadException, DataDumpException
+from . import dwh, jobs, export, metadata, search, client, auditlog, common, projects
 
 
 class Sdk:
 
-    def __init__(self, access_token, project_id=None, server_url=None, retry_count=12, retry_wait=5):
+    # Top level SDK class providing general methods managing the CleverMaps Workspace
 
-        valid_urls = ["https://secure.clevermaps.io", "https://staging.clevermaps.io"]
+    def __init__(self, access_token, server_url=None):
 
-        if not server_url:
-            server_url = valid_urls[0]
-        elif server_url and server_url not in valid_urls:
-            server_url = valid_urls[0]
-
-        self.client = client.Client(access_token, server_url, retry_count, retry_wait)
-
-        if project_id:
-
-            self.project_id = project_id
-
-            self.projects = projects.Projects(self.client)
-            self.project = projects.Project(self.client)
-
-            # TODO drzet strukturu i tady? napr. self.dwh.*, self.metadata.* apod?
-
-            self.queries = dwh.Queries(self.client, self.project_id)
-            self.property_values = dwh.PropertyValues(self.client, self.project_id)
-            self.metric_ranges = dwh.MetricRanges(self.client, self.project_id)
-            self.available_datasets = dwh.AvailableDatasets(self.client, self.project_id)
-            self.data_upload = dwh.DataUpload(self.client, self.project_id)
-            self.jobs = jobs.Jobs(self.client, self.project_id)
-            self.job_detail = jobs.JobDetail(self.client, self.project_id)
-            self.export_data = export.ExportData(self.client, self.project_id)
-            self.search = search.Search(self.client, self.project_id)
-            self.metrics = metadata.Metrics(self.client, self.project_id)
-            self.datasets = metadata.Datasets(self.client, self.project_id)
-            self.views = metadata.Views(self.client, self.project_id)
-            self.indicators = metadata.Indicators(self.client, self.project_id)
-            self.auditlog = auditlog.AuditLog(self.client, self.project_id)
-        else:
-            self.projects = projects.Projects(self.client)
-            self.project = projects.Project(self.client)
+        self.client = client.Client(access_token, server_url)
+         
+        self.export = export.Export(self.client)
+        self.projects = projects.Projects(self.client)
 
 
-    def _get_query_content(self, properties_names, metric_names, filter_by, validate=True):
+    def open(self, project_id):
 
-        if validate:
-            invalid_props = self._validate_query_properties(properties_names)
-            invalid_metrics = self._validate_query_metrics(metric_names)
-            invalid_filter_props = self._validate_query_properties([f['property'] for f in filter_by])
+        return ProjectSdk(self.client, project_id)
 
-            if invalid_props or invalid_metrics or invalid_filter_props:
-                raise InvalidDwhQueryException('Query definition is invalid. Invalid properties: {}. Invalid metrics: {}. Invalid filter properties: {}.'.format(
-                        invalid_props, invalid_metrics, invalid_filter_props))
 
-        metrics = []
-        for m in metric_names:
-            metrics.append({
-                "id": m,
-                "type": "metric",
-                "metric": "/rest/projects/{}/md/metrics?name={}".format(self.project_id, m)
-            })
+class ProjectSdk:
 
-        properties = []
-        for prop in properties_names:
-            properties.append(
-                {
-                    'id': prop.replace('.', '_'),
-                    'type': 'property',
-                    'value': prop
-                }
-            )
+    # Project level SDK class providing user friendly wrapper methods
 
-        query = {
-            "properties": properties + metrics,
-            "filterBy": filter_by
-        }
+    def __init__(self, client, project_id):
 
-        return query
-    
+        self.project_id = project_id
+        self.client = client
 
-    def _validate_query_metrics(self, metrics):
+        self.export = export.Export(self.client)
+        self.projects = projects.Projects(self.client)
 
-        metrics_md = self.metrics.list_metrics()
+        self.dwh = dwh.DataWarehouse(self.client, project_id)
+        self.jobs = jobs.Jobs(self.client, project_id)
+        self.metadata = metadata.Metadata(self.client, project_id)
+        
+        self.search = search.Search(self.client, project_id)
+        self.auditlog = auditlog.AuditLog(self.client, project_id)
 
-        metrics_diff = list(set(metrics).difference(set([m['name'] for m in metrics_md])))
 
-        return metrics_diff
-    
-
-    def _validate_query_properties(self, properties):
-
-        invalid_props = []
-
-        datasets_mds = self.datasets.list_datasets()
-        for prop in properties:
-            ds = prop.split('.')[0]
-            if ds not in [d['name'] for d in datasets_mds]:
-                invalid_props.append(prop)
-                continue
-
-            ds_md = next(d for d in datasets_mds if d['name'] == ds)
-            ds_md_props = [dp['name'] for dp in ds_md['ref']['properties']]
-
-            p = prop.split('.')[1]
-            if p not in ds_md_props:
-                invalid_props.append(prop)
-
-        return invalid_props
-    
-
-    def query(self, config, limit=1000, validate=True):
+    def query(self, config, limit=1000):
 
         props = config.get('properties', [])
         metrics = config.get('metrics', [])
         filter_by = config.get('filter_by', [])
 
-        query_content = self._get_query_content(props, metrics, filter_by, validate)
+        query_content = common.get_query_content(self.project_id, props, metrics, filter_by)
 
-        location = self.queries.accept_queries(query_content, limit)
-        res = self.queries.get_queries(location)
+        location = self.dwh.queries.accept_queries(query_content, limit)
+        res = self.dwh.queries.get_queries(location)
         
         # Response does not preserve properties order, fix it back
         props_order = [p['id'] for p in query_content['properties']]
@@ -137,8 +63,9 @@ class Sdk:
 
     def get_property_values(self, property_name):
 
-        location = self.property_values.accept_property_values(property_name)
-        res = self.property_values.get_property_values(location)
+        self.dwh.open(self.project_id)
+        location = self.dwh.property_values.accept_property_values(property_name)
+        res = self.dwh.property_values.get_property_values(location)
 
         return res['content']
     
@@ -149,31 +76,21 @@ class Sdk:
         metrics = query.get('metrics', [])
         filter_by = query.get('filter_by', [])
 
-        query_content = self._get_query_content(props, metrics, filter_by, validate=True)
+        query_content = common.get_query_content(self.project_id, props, metrics, filter_by)
 
-        location = self.metric_ranges.accept_metric_ranges(query_content)
-        res = self.metric_ranges.get_metric_ranges(location)
+        self.dwh.open(self.project_id)
+        location = self.dwh.metric_ranges.accept_metric_ranges(query_content)
+        res = self.dwh.metric_ranges.get_metric_ranges(location)
 
         return res['content']
     
 
     def get_available_datasets(self, metric_name):
 
-        res = self.available_datasets.get_available_datasets(metric_name)
+        res = self.dwh.available_datasets.get_available_datasets(metric_name)
         datasets = [dataset['name'] for dataset in res['content'][0]['availableDatasets'] if dataset]
 
         return datasets
-    
-
-    @retry(stop=stop_after_attempt(50), 
-           wait=wait_fixed(1),
-           retry=retry_if_not_result(lambda r: r['status'] == 'SUCCEEDED')
-    )
-    def get_job_result(self, link):
-
-        job_result = self.job_detail.get_job_status(link)
-
-        return job_result
 
 
     def query_points(self, points, point_queries):
@@ -183,58 +100,65 @@ class Sdk:
                 if m['type'] == 'metric' and not m['metric'].startswith('/rest'):
                     m['metric'] = "/rest/projects/{}/md/metrics?name={}".format(self.project_id, m['metric']) 
 
-
-        job_resp = self.jobs.start_new_bulk_point_query_job(points, point_queries)
-
-        job_result = self.get_job_result(job_resp['links'][0]['href'])
+        job_resp = self.jobs.jobs.start_new_bulk_point_query_job(points, point_queries)
+        job_result = self.jobs.job_detail.get_job_status(job_resp['links'][0]['href'])
 
         return job_result
     
 
     def export_to_csv(self, config):
 
-        query_content = self._get_query_content(config['query'].get('properties', []),
-                                                config['query'].get('metrics', []),
-                                                config['query'].get('filter_by', []),
-                                                validate=False)
+        query_content = common.get_query_content(
+            self.project_id,
+            config['query'].get('properties', []),
+            config['query'].get('metrics', []),
+            config['query'].get('filter_by', [])
+        )
 
-        job_resp = self.jobs.start_new_export_job(query_content, config['filename'], config['format'])
+        job_resp = self.jobs.jobs.start_new_export_job(query_content, config['filename'], config['format'])
+        job_result = self.jobs.job_detail.get_job_status(job_resp['links'][0]['href'])
 
-        job_result = self.get_job_result(job_resp['links'][0]['href'])
-
-        return self.export_data.get_export_data(job_result['result']['exportResult'])
+        return self.export.export_data.get_export_data(job_result['result']['exportResult'])
 
 
-    def upload_data(self, dataset, mode, file, csv_options={}):
+    def upload_data(self,dataset, mode, file, csv_options={}):
+        
+        upload_link = self.dwh.data_upload.upload(file)
 
-        upload_link = self.data_upload.upload(file)
+        job_resp = self.jobs.jobs.start_new_data_pull_job(dataset, mode, upload_link, csv_options)
+        job_result = self.jobs.job_detail.get_job_status(job_resp['links'][0]['href'])
 
-        job_resp = self.jobs.start_new_data_pull_job(dataset, mode, upload_link, csv_options)
-
-        while True:
-            job_status = self.job_detail.get_job_status(job_resp['links'][0]['href'])
-            print(job_status)
-
-            if job_status['status'] == 'SUCCEEDED':
-                return job_status
-            elif job_status['status'] in ('FAILED', 'TIMED_OUT', 'ABORTED'):
-                raise DataUploadException(job_status)
-
-            time.sleep(5)
+        return job_result
 
 
     def dump_data(self, dataset):
 
-        job_resp = self.jobs.start_new_data_dump_job(dataset)
+        job_resp = self.jobs.jobs.start_new_data_dump_job(dataset)
+        job_result = self.jobs.job_detail.get_job_status(job_resp['links'][0]['href'])
 
-        while True:
-            job_status = self.job_detail.get_job_status(job_resp['links'][0]['href'])
-            print(job_status)
+        return job_result
 
-            if job_status['status'] == 'SUCCEEDED':
-                return self.export_data.get_export_data(job_status['result']['links'][0]['href'])
-            elif job_status['status'] in ('FAILED', 'TIMED_OUT', 'ABORTED'):
-                raise DataDumpException(job_status)
 
-            time.sleep(5)
+    def clone_project(self, dest_organization_id, dest_project_title=None, dest_project_description=None):
+
+        src_project_id = self.project_id
+        src_project_info = self.projects.project.get_project_by_id(self.project_id)
+
+        if not dest_project_title: dest_project_title = '{} - clone'.format(src_project_info['title']) 
+        if not dest_project_description: dest_project_description = src_project_info['description']
+
+        dest_project_id = self.projects.projects.create_project(dest_organization_id, dest_project_title, dest_project_description)['id']
+
+        job_resp = self.jobs.jobs.start_new_import_project_job(dest_project_id, src_project_id)
+
+        job_result = self.jobs.job_detail.get_job_status(job_resp['links'][0]['href'], retry_count=30, retry_wait=10)
+
+        return job_result
+
+
+    def fulltext_search(self, dataset, text):
+
+        return self.search.search.search(dataset, text)
+
+
 

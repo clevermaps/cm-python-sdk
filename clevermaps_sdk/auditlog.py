@@ -1,7 +1,15 @@
-from . import base
 
 
-class AuditLog(base.Base):
+class AuditLog:
+
+    def __init__(self, client, project_id):
+
+        self.client = client
+
+        self.audit_log = _AuditLog(self.client, project_id)
+
+
+class _AuditLog:
 
     def __init__(self, client, project_id):
 

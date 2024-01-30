@@ -1,8 +1,36 @@
-from . import base
+from . import projects
 import os
 import io
 
-class Queries(base.Base):
+
+
+class DataWarehouse:
+
+    def __init__(self, client, project_id):
+
+        self.client = client
+
+        self.queries = _Queries(self.client, project_id)
+        self.property_values = _PropertyValues(self.client, project_id)
+        self.metric_ranges = _MetricRanges(self.client, project_id)
+        self.available_datasets = _AvailableDatasets(self.client, project_id)
+        self.data_upload = _DataUpload(self.client, project_id)
+    
+
+class _DataWarehouseBase:
+
+    def __init__(self, client, project_id):
+
+        project = projects.Projects(client).project
+        project_config = project.get_project_by_id(project_id)
+
+        self.client = client
+        self.project_id = project_id
+        self.md_url = project_config['services']['md']
+        self.dwh_url = project_config['services']['dwh']
+
+
+class _Queries(_DataWarehouseBase):
 
     def accept_queries(self, query, size=200):
 
@@ -23,7 +51,7 @@ class Queries(base.Base):
         return results
 
 
-class AvailableDatasets(base.Base):
+class _AvailableDatasets(_DataWarehouseBase):
 
     def get_available_datasets(self, metric_name):
 
@@ -44,7 +72,7 @@ class AvailableDatasets(base.Base):
         return resp.json()
 
 
-class PropertyValues(base.Base):
+class _PropertyValues(_DataWarehouseBase):
 
     # TODO filter, page, size, sort
     def accept_property_values(self, property_name):
@@ -61,7 +89,7 @@ class PropertyValues(base.Base):
         return resp.json()
 
 
-class MetricRanges(base.Base):
+class _MetricRanges(_DataWarehouseBase):
 
     def accept_metric_ranges(self, query):
 
@@ -77,7 +105,7 @@ class MetricRanges(base.Base):
         return resp.json()
 
 
-class DataUpload(base.Base):
+class _DataUpload(_DataWarehouseBase):
 
     def upload(self, file):
 

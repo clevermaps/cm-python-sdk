@@ -8,13 +8,22 @@ from .exceptions import AccessTokenException
 
 class Client:
 
-    def __init__(self, access_token, server_url, retry_count, retry_wait):
+    def __init__(self, access_token, server_url=None, retry_count=30, retry_wait=6):
 
-        self.base_url = server_url
+        self.base_url = self._get_server_url(server_url)
         self.session = requests.Session()
         self.retry_count = retry_count
         self.retry_wait = retry_wait
         self.bearer_token = self._get_token(access_token)
+
+    def _get_server_url(self, server_url):
+
+        valid_urls = ["https://secure.clevermaps.io", "https://staging.clevermaps.io"]
+
+        if not server_url:
+            return valid_urls[0]
+        elif server_url and server_url not in valid_urls:
+            return valid_urls[0]
         
     def _get_token(self, access_token):
 

@@ -1,7 +1,18 @@
-from . import base
+
+class Search:
+
+    def __init__(self, client, project_id):
+
+        self.client = client
+        self.search = _Search(self.client, project_id)
 
 
-class Search(base.Base):
+class _Search:
+
+    def __init__(self, client, project_id):
+
+        self.client = client
+        self.project_id = project_id
 
     def search(self, dataset, query, size=20):
 

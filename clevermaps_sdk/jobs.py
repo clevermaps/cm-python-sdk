@@ -1,7 +1,26 @@
-from . import base
+from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_result
 
 
-class Jobs(base.Base):
+class Jobs:
+    
+    def __init__(self, client, project_id):
+        
+        self.client = client
+        
+        self.jobs = _Jobs(self.client, project_id)
+        self.job_detail = _JobDetail(self.client, project_id)
+        self.job_history = _JobHistory(self.client, project_id)
+    
+
+class _JobsBase:
+    
+  def __init__(self, client, project_id):
+
+        self.client = client
+        self.project_id = project_id
+
+
+class _Jobs(_JobsBase):
 
     def start_new_export_job(self, query, filename, format):
 
@@ -74,6 +93,24 @@ class Jobs(base.Base):
 
         return resp.json()
     
+
+    def start_new_import_project_job(self, project_id, source_project_id):
+        
+        url = '/rest/jobs'
+
+        params = {
+            "type": "importProject",
+            "projectId": project_id,
+            "content": {
+              "sourceProjectId": source_project_id,
+              "force": True
+            }
+        }
+
+        resp = self.client.make_request('post', url=url, params=params)
+
+        return resp.json()
+    
     
     def start_new_bulk_point_query_job(self, points, pointQueries):
         
@@ -93,11 +130,50 @@ class Jobs(base.Base):
         return resp.json()
 
 
-class JobDetail(base.Base):
+class _JobDetail(_JobsBase):
 
+    def get_job_status(self, url, retry_count=180, retry_wait=1):
+        
+      http_retry = retry(
+          stop=stop_after_attempt(retry_count),
+          wait=wait_fixed(retry_wait),
+          retry=retry_if_result(lambda r: r['status'] == 'RUNNING')
+      )
 
-    def get_job_status(self, url):
+      get_job_status_retry = http_retry(self._get_job_status)
+
+      return get_job_status_retry(url)
+      
+
+    def _get_job_status(self, url):
 
         resp = self.client.make_request('get', url=url)
 
-        return resp.json()
+        resp_json = resp.json()
+
+        print(resp_json)
+
+        return resp_json
+    
+
+class _JobHistory(_JobsBase):
+    
+    def get_job_history(self, type, account_id):
+        
+        url = '/rest/jobs/history'
+
+        params = {
+            "type": type,
+            "projectId": self.project_id,
+            "accountId": account_id
+        }
+
+        resp = self.client.make_request_page('get', url=url, params=params)
+
+        results = []
+        for page in resp:
+            content = page.json()['content']
+            results.extend(content)
+
+        return results
+

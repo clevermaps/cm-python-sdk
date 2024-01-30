@@ -1,9 +1,34 @@
-from . import base
+from . import projects
 import json
 from pydantic.utils import deep_update
 
 
-class Metadata(base.Base):
+
+class Metadata:
+
+    def __init__(self, client, project_id):
+        
+        self.client = client
+        self.project_id = project_id
+
+        self.metrics = _Metrics(self.client, project_id)
+        self.indicators = _Indicators(self.client, project_id)
+        self.views = _Views(self.client, project_id)
+        self.datasets = _Datasets(self.client, project_id)
+        self.exports = _Exports(self.client, project_id)
+
+
+class _MetadataBase:
+
+    def __init__(self, client, project_id):
+
+        project = projects.Projects(client).project
+        project_config = project.get_project_by_id(project_id)
+
+        self.client = client
+        self.project_id = project_id
+        self.md_url = project_config['services']['md']
+        self.dwh_url = project_config['services']['dwh']
 
     def get_metadata(self, url):
 
@@ -46,7 +71,7 @@ class Metadata(base.Base):
         return resp.json()
     
 
-class Metrics(Metadata):
+class _Metrics(_MetadataBase):
 
     def get_metric_by_name(self, metric_name):
 
@@ -71,7 +96,7 @@ class Metrics(Metadata):
         return self.update_metadata(resp, url, metric_update_json)
     
 
-class Indicators(Metadata):
+class _Indicators(_MetadataBase):
 
     def get_indicator_by_name(self, indicator_name):
 
@@ -96,7 +121,7 @@ class Indicators(Metadata):
         return self.update_metadata(resp, url, indicator_update_json)
     
 
-class Views(Metadata):
+class _Views(_MetadataBase):
 
     def get_view_by_name(self, view_name):
 
@@ -121,7 +146,7 @@ class Views(Metadata):
         return self.update_metadata(resp, url, view_update_json)
 
 
-class Datasets(Metadata):
+class _Datasets(_MetadataBase):
 
     def get_dataset_by_name(self, dataset_name):
 
@@ -146,10 +171,13 @@ class Datasets(Metadata):
         return self.update_metadata(resp, url, dataset_update_json)
 
 
-class Exports(Metadata):
+class _Exports(_MetadataBase):
 
     def list_exports(self):
 
         url = '{}/exports'.format(self.md_url)
 
         return self.list_metadata(url)
+
+
+

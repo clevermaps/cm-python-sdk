@@ -1,7 +1,16 @@
-from . import base
+
+class Export:
+
+    def __init__(self, client):
+
+        self.export_data = ExportData(client)
 
 
-class ExportData(base.Base):
+class ExportData:
+
+    def __init__(self, client):
+
+        self.client = client
 
     def get_export_data(self, export_url):
 

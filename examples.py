@@ -5,17 +5,15 @@ project_id = ""
 # Your access_token (https://clevermaps.docs.apiary.io/#reference/authentication)
 access_token = ""
 
-# CleverMaps SDK object initialization - WITHOUT specific project
+# CleverMaps SDK object initialization
 cm_sdk = sdk.Sdk(access_token)
 
-# In this case only some endpoints are available
-print(cm_sdk.projects.list_projects())
-print(cm_sdk.project.get_project_by_id(project_id))
+# Call some global workspace methods
+print(cm_sdk.projects.projects.list_projects())
+print(cm_sdk.projects.project.get_project_by_id(project_id))
 
-# CleverMaps SDK object initialization - WITH specific project
-cm_sdk = sdk.Sdk(access_token, project_id)
-
-# In this case all endpoints are available
+# Open specific project and work with data or metadata
+cm_project = cm_sdk.open(project_id)
 
 # Query data and metrics
 query_json = {
@@ -43,7 +41,7 @@ query_json = {
 }
 
 # Print query results as json
-print(cm_sdk.query(query_json))
+print(cm_project.query(query_json))
 
 # Export query results to the file
 export_json = {
@@ -52,24 +50,24 @@ export_json = {
     'format': 'csv'
 }
 
-export_result = cm_sdk.export_to_csv(export_json)
+export_result = cm_project.export_to_csv(export_json)
 with open('export.csv', 'w') as outf:
     outf.write(export_result)
 
 # Get available datasets for the metric
-print(cm_sdk.get_available_datasets('pois_count_metric'))
+print(cm_project.get_available_datasets('pois_count_metric'))
 
 # Get property values of the column
-print(cm_sdk.get_property_values("poi_dwh.subtype_name"))
+print(cm_project.get_property_values("poi_dwh.subtype_name"))
 
 # List all metrics in the project
-print(cm_sdk.metrics.list_metrics())
+print(cm_project.metadata.metrics.list_metrics())
 
 # List all datasets in the project
-print(cm_sdk.datasets.list_datasets())
+print(cm_project.metadata.datasets.list_datasets())
 
 # Fulltext search in dataset
-print(cm_sdk.search.search('poi_dwh', 'Albert'))
+print(cm_project.fulltext_search('poi_dwh', 'Albert'))
 
 # Upload CSV file to CleverMaps
 csv_options = {
@@ -79,10 +77,10 @@ csv_options = {
     "escape": "\\"
 }
 with open('./data/poi_dwh.csv', 'rb') as f:
-    print(cm_sdk.upload_data('poi_dwh', 'full', f, csv_options))
+    print(cm_project.upload_data('poi_dwh', 'full', f, csv_options))
 
 # Dump CSV file from CleverMaps
-dump_result = cm_sdk.dump_data('poi_dwh')
+dump_result = cm_project.dump_data('poi_dwh')
 with open('./data/poi_dwh_dump.csv', 'w') as outf:
     outf.write(dump_result)
 
@@ -90,14 +88,14 @@ with open('./data/poi_dwh_dump.csv', 'w') as outf:
 metric_update_json = {
     'description': 'New description'
 }
-print(cm_sdk.metrics.update_metric('pois_sum_metric', metric_update_json))
+print(cm_project.metadata.metrics.update_metric('pois_sum_metric', metric_update_json))
 
 view_update_json = {
     'description': 'New description'
 }
-print(cm_sdk.views.update_view('exposure_index_view', view_update_json))
+print(cm_project.metadata.views.update_view('exposure_index_view', view_update_json))
 
 dataset_update_json = {
     'description': 'New description'
 }
-print(cm_sdk.datasets.update_dataset('poi_dwh', dataset_update_json))
+print(cm_project.metadata.datasets.update_dataset('poi_dwh', dataset_update_json))
