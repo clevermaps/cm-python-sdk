@@ -6,7 +6,7 @@ class AuditLog:
 
         self.client = client
 
-        self.audit_log = _AuditLog(self.client, project_id)
+        self.auditlog = _AuditLog(self.client, project_id)
 
 
 class _AuditLog:
