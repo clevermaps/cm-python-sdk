@@ -1,6 +1,6 @@
 from collections import OrderedDict
 
-from . import dwh, jobs, export, metadata, search, client, auditlog, common, projects
+from . import dwh, jobs, export, metadata, search, client, auditlog, common, projects, accounts
 
 
 class Sdk:
@@ -13,6 +13,7 @@ class Sdk:
          
         self.export = export.Export(self.client)
         self.projects = projects.Projects(self.client)
+        self.accounts = accounts.Accounts(self.client)
 
 
     def open(self, project_id):
@@ -20,17 +21,18 @@ class Sdk:
         return ProjectSdk(self.client, project_id)
 
 
-class ProjectSdk:
+class ProjectSdk():
 
     # Project level SDK class providing user friendly wrapper methods
 
     def __init__(self, client, project_id):
 
-        self.project_id = project_id
         self.client = client
+        self.project_id = project_id
 
         self.export = export.Export(self.client)
         self.projects = projects.Projects(self.client)
+        self.accounts = accounts.Accounts(self.client)
 
         self.dwh = dwh.DataWarehouse(self.client, project_id)
         self.jobs = jobs.Jobs(self.client, project_id)
@@ -149,9 +151,9 @@ class ProjectSdk:
 
         job_resp = self.jobs.jobs.start_new_import_project_job(dest_project_id, src_project_id)
 
-        job_result = self.jobs.job_detail.get_job_status(job_resp['links'][0]['href'], retry_count=30, retry_wait=10)
+        self.jobs.job_detail.get_job_status(job_resp['links'][0]['href'], retry_count=30, retry_wait=10)
 
-        return job_result
+        return dest_project_id
 
 
     def fulltext_search(self, dataset, text):

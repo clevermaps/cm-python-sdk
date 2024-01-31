@@ -74,7 +74,7 @@ class _Members(_ProjectsBase):
 
         return results
     
-    def add_new_member(self, project_id, account_id, role, status):
+    def add_new_member(self, project_id, account_id, role='VIEWER', status='ENABLED'):
 
         url = '/rest/projects/{}/members'.format(project_id)
         params = {
