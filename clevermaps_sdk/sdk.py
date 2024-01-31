@@ -63,7 +63,6 @@ class ProjectSdk:
 
     def get_property_values(self, property_name):
 
-        self.dwh.open(self.project_id)
         location = self.dwh.property_values.accept_property_values(property_name)
         res = self.dwh.property_values.get_property_values(location)
 
@@ -78,7 +77,6 @@ class ProjectSdk:
 
         query_content = common.get_query_content(self.project_id, props, metrics, filter_by)
 
-        self.dwh.open(self.project_id)
         location = self.dwh.metric_ranges.accept_metric_ranges(query_content)
         res = self.dwh.metric_ranges.get_metric_ranges(location)
 
