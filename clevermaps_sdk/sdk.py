@@ -170,7 +170,7 @@ class ProjectSdk():
         if not existing_number_postfixes:
             new_name_postfix = 0
         else:
-            new_name_postfix = int(existing_number_postfixes.sort()[-1]) + 1
+            new_name_postfix = int(sorted(existing_number_postfixes)[-1]) + 1
 
         new_name = '{}_{}'.format(current_name, new_name_postfix)
 
