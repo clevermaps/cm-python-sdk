@@ -180,7 +180,7 @@ class ProjectSdk():
     def clone_metadata(self, metadata_type, metadata_name):
 
         if metadata_type == 'view':
-            view_json = self.metadata.views.get_view_by_name(metadata_name)
+            view_json = self.metadata.views.get_view_by_name(metadata_name).json()
             existing_views_names = [ v['name'] for v in self.metadata.views.list_views() ]
             
             clone_name = self._get_metadata_clone_name(existing_views_names, view_json['name'])

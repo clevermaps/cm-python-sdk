@@ -30,11 +30,13 @@ class _MetadataBase:
         self.md_url = project_config['services']['md']
         self.dwh_url = project_config['services']['dwh']
 
+
     def get_metadata(self, url):
 
         resp = self.client.make_request('get', url=url)
 
-        return resp.json()
+        # return as raw response because of headers are needed in update metadata
+        return resp
     
 
     def list_metadata(self, url):
@@ -98,7 +100,7 @@ class _Metrics(_MetadataBase):
 
         resp = self.get_metric_by_name(metric_name)
 
-        url = '{}/metrics/{}'.format(self.md_url, resp['id'])
+        url = '{}/metrics/{}'.format(self.md_url, resp.json()['id'])
 
         return self.update_metadata(resp, url, metric_update_json)
     
@@ -123,7 +125,7 @@ class _Indicators(_MetadataBase):
 
         resp = self.get_indicator_by_name(indicator_name)
 
-        url = '{}/indicator/{}'.format(self.md_url, resp['id'])
+        url = '{}/indicator/{}'.format(self.md_url, resp.json()['id'])
 
         return self.update_metadata(resp, url, indicator_update_json)
     
@@ -148,7 +150,7 @@ class _Views(_MetadataBase):
 
         resp = self.get_view_by_name(view_name)
 
-        url = '{}/views/{}'.format(self.md_url, resp['id'])
+        url = '{}/views/{}'.format(self.md_url, resp.json()['id'])
 
         return self.update_metadata(resp, url, view_update_json)
     
@@ -182,7 +184,7 @@ class _Datasets(_MetadataBase):
 
         resp = self.get_dataset_by_name(dataset_name)
 
-        url = '{}/datasets/{}'.format(self.md_url, resp['id'])
+        url = '{}/datasets/{}'.format(self.md_url, resp.json()['id'])
 
         return self.update_metadata(resp, url, dataset_update_json)
 
