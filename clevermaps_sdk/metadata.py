@@ -34,7 +34,7 @@ class _MetadataBase:
 
         resp = self.client.make_request('get', url=url)
 
-        return resp
+        return resp.json()
     
 
     def list_metadata(self, url):
@@ -69,6 +69,13 @@ class _MetadataBase:
         resp = self.client.make_request('put', url=update_metadata_url, params=json.dumps(metadata_json), headers=headers)
 
         return resp.json()
+    
+    
+    def create_metadata(self, url, create_metadata_json):
+
+        resp = self.client.make_request('post', url=url, params=create_metadata_json)
+
+        return resp
     
 
 class _Metrics(_MetadataBase):
@@ -144,6 +151,15 @@ class _Views(_MetadataBase):
         url = '{}/views/{}'.format(self.md_url, resp.json()['id'])
 
         return self.update_metadata(resp, url, view_update_json)
+    
+
+    def create_view(self, view_create_json):
+
+        url = '{}/views'.format(self.md_url)
+
+        resp = self.create_metadata(url, view_create_json)
+
+        return resp.json()
 
 
 class _Datasets(_MetadataBase):

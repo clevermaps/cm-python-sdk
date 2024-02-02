@@ -1,4 +1,5 @@
 from collections import OrderedDict
+import re
 
 from . import dwh, jobs, export, metadata, search, client, auditlog, common, projects, accounts
 
@@ -161,4 +162,39 @@ class ProjectSdk():
         return self.search.search.search(dataset, text)
 
 
+    def _get_metadata_clone_name(self, existing_names, current_name=None):
 
+        similar_names = [ n for n in existing_names if current_name in n ]
+        existing_number_postfixes = [ n[-1:] for n in similar_names if re.match(r'_\d', n[-2:]) ]
+
+        if not existing_number_postfixes:
+            new_name_postfix = 0
+        else:
+            new_name_postfix = int(existing_number_postfixes.sort()[-1]) + 1
+
+        new_name = '{}_{}'.format(current_name, new_name_postfix)
+
+        return new_name
+
+
+    def clone_metadata(self, metadata_type, metadata_name):
+
+        if metadata_type == 'view':
+            view_json = self.metadata.views.get_view_by_name(metadata_name)
+            existing_views_names = [ v['name'] for v in self.metadata.views.list_views() ]
+            
+            clone_name = self._get_metadata_clone_name(existing_views_names, view_json['name'])
+
+            view_clone_json = {
+                'name': clone_name,
+                'type': view_json['type'],
+                'title': view_json['title'],
+                'description': view_json['description'],
+                'content': view_json['content']
+            }
+            resp = self.metadata.views.create_view(view_clone_json)
+
+            return resp
+        
+        else:
+            return 'Metadata type {} is not supported yet.'.format(metadata_type)
