@@ -98,7 +98,7 @@ class _Metrics(_MetadataBase):
 
         resp = self.get_metric_by_name(metric_name)
 
-        url = '{}/metrics/{}'.format(self.md_url, resp.json()['id'])
+        url = '{}/metrics/{}'.format(self.md_url, resp['id'])
 
         return self.update_metadata(resp, url, metric_update_json)
     
@@ -123,7 +123,7 @@ class _Indicators(_MetadataBase):
 
         resp = self.get_indicator_by_name(indicator_name)
 
-        url = '{}/indicator/{}'.format(self.md_url, resp.json()['id'])
+        url = '{}/indicator/{}'.format(self.md_url, resp['id'])
 
         return self.update_metadata(resp, url, indicator_update_json)
     
@@ -148,7 +148,7 @@ class _Views(_MetadataBase):
 
         resp = self.get_view_by_name(view_name)
 
-        url = '{}/views/{}'.format(self.md_url, resp.json()['id'])
+        url = '{}/views/{}'.format(self.md_url, resp['id'])
 
         return self.update_metadata(resp, url, view_update_json)
     
@@ -182,7 +182,7 @@ class _Datasets(_MetadataBase):
 
         resp = self.get_dataset_by_name(dataset_name)
 
-        url = '{}/datasets/{}'.format(self.md_url, resp.json()['id'])
+        url = '{}/datasets/{}'.format(self.md_url, resp['id'])
 
         return self.update_metadata(resp, url, dataset_update_json)
 
