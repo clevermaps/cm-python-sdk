@@ -94,7 +94,7 @@ class ProjectSdk():
         return datasets
 
 
-    def query_points(self, points, point_queries):
+    def query_points(self, points, point_queries, retry_count=180, retry_wait=1):
 
         for q in point_queries:
             for m in q['properties']:
@@ -102,7 +102,7 @@ class ProjectSdk():
                     m['metric'] = "/rest/projects/{}/md/metrics?name={}".format(self.project_id, m['metric']) 
 
         job_resp = self.jobs.jobs.start_new_bulk_point_query_job(points, point_queries)
-        job_result = self.jobs.job_detail.get_job_status(job_resp['links'][0]['href'])
+        job_result = self.jobs.job_detail.get_job_status(job_resp['links'][0]['href'], retry_count, retry_wait)
 
         return job_result
     
