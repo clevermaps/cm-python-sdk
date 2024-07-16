@@ -11,7 +11,7 @@ class Sdk:
     def __init__(self, access_token, server_url=None):
 
         self.client = client.Client(access_token, server_url)
-         
+
         self.export = export.Export(self.client)
         self.projects = projects.Projects(self.client)
         self.accounts = accounts.Accounts(self.client)
@@ -38,7 +38,7 @@ class ProjectSdk():
         self.dwh = dwh.DataWarehouse(self.client, project_id)
         self.jobs = jobs.Jobs(self.client, project_id)
         self.metadata = metadata.Metadata(self.client, project_id)
-        
+
         self.search = search.Search(self.client, project_id)
         self.auditlog = auditlog.AuditLog(self.client, project_id)
 
@@ -53,7 +53,7 @@ class ProjectSdk():
 
         location = self.dwh.queries.accept_queries(query_content, limit)
         res = self.dwh.queries.get_queries(location)
-        
+
         # Response does not preserve properties order, fix it back
         props_order = [p['id'] for p in query_content['properties']]
 
@@ -62,7 +62,7 @@ class ProjectSdk():
             res_reordered.append(dict(OrderedDict((k, r['content'][k]) for k in props_order)))
 
         return res_reordered
-    
+
 
     def get_property_values(self, property_name):
 
@@ -70,8 +70,8 @@ class ProjectSdk():
         res = self.dwh.property_values.get_property_values(location)
 
         return res['content']
-    
-    
+
+
     def get_metric_ranges(self, query):
 
         props = query.get('properties', [])
@@ -84,7 +84,7 @@ class ProjectSdk():
         res = self.dwh.metric_ranges.get_metric_ranges(location)
 
         return res['content']
-    
+
 
     def get_available_datasets(self, metric_name):
 
@@ -101,11 +101,13 @@ class ProjectSdk():
                 if m['type'] == 'metric' and not m['metric'].startswith('/rest'):
                     m['metric'] = "/rest/projects/{}/md/metrics?name={}".format(self.project_id, m['metric']) 
 
+            q['filterBy'] = q.pop('filter_by')
+
         job_resp = self.jobs.jobs.start_new_bulk_point_query_job(points, point_queries)
         job_result = self.jobs.job_detail.get_job_status(job_resp['links'][0]['href'], retry_count, retry_wait)
 
         return job_result
-    
+
 
     def export_to_csv(self, config):
 
@@ -123,7 +125,7 @@ class ProjectSdk():
 
 
     def upload_data(self,dataset, mode, file, csv_options={}):
-        
+
         upload_link = self.dwh.data_upload.upload(file)
 
         job_resp = self.jobs.jobs.start_new_data_pull_job(dataset, mode, upload_link, csv_options)
@@ -145,7 +147,7 @@ class ProjectSdk():
         src_project_id = self.project_id
         src_project_info = self.projects.project.get_project_by_id(self.project_id)
 
-        if not dest_project_title: dest_project_title = '{} - clone'.format(src_project_info['title']) 
+        if not dest_project_title: dest_project_title = '{} - clone'.format(src_project_info['title'])
         if not dest_project_description: dest_project_description = src_project_info['description']
 
         dest_project_id = self.projects.projects.create_project(dest_organization_id, dest_project_title, dest_project_description)['id']
@@ -182,7 +184,7 @@ class ProjectSdk():
         if metadata_type == 'view':
             view_json = self.metadata.views.get_view_by_name(metadata_name).json()
             existing_views_names = [ v['name'] for v in self.metadata.views.list_views() ]
-            
+
             clone_name = self._get_metadata_clone_name(existing_views_names, view_json['name'])
 
             view_clone_json = {
@@ -195,6 +197,6 @@ class ProjectSdk():
             resp = self.metadata.views.create_view(view_clone_json)
 
             return resp
-        
+
         else:
             return 'Metadata type {} is not supported yet.'.format(metadata_type)

@@ -125,6 +125,8 @@ class _Jobs(_JobsBase):
             }
         }
 
+        print(params)
+
         resp = self.client.make_request('post', url=url, params=params)
 
         return resp.json()
