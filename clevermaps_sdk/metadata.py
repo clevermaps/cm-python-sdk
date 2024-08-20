@@ -14,6 +14,8 @@ class Metadata:
         self.metrics = _Metrics(self.client, project_id)
         self.indicators = _Indicators(self.client, project_id)
         self.views = _Views(self.client, project_id)
+        self.maps = _Maps(self.client, project_id)
+        self.dashboards = _Dashboards(self.client, project_id)
         self.datasets = _Datasets(self.client, project_id)
         self.exports = _Exports(self.client, project_id)
 
@@ -160,6 +162,72 @@ class _Views(_MetadataBase):
         url = '{}/views'.format(self.md_url)
 
         resp = self.create_metadata(url, view_create_json)
+
+        return resp.json()
+
+
+class _Maps(_MetadataBase):
+
+    def get_map_by_name(self, map_name):
+
+        url = '{}/map?name={}'.format(self.md_url, map_name)
+
+        return self.get_metadata(url)
+
+    def list_maps(self):
+
+        url = '{}/maps'.format(self.md_url)
+
+        return self.list_metadata(url)
+    
+    
+    def update_map(self, map_name, map_update_json):
+
+        resp = self.get_map_by_name(map_name)
+
+        url = '{}/maps/{}'.format(self.md_url, resp.json()['id'])
+
+        return self.update_metadata(resp, url, view_update_json)
+    
+
+    def create_map(self, map_create_json):
+
+        url = '{}/maps'.format(self.md_url)
+
+        resp = self.create_metadata(url, map_create_json)
+
+        return resp.json()
+
+
+class _Dashboards(_MetadataBase):
+
+    def get_dashboard_by_name(self, dashboard_name):
+
+        url = '{}/dashboard?name={}'.format(self.md_url, dashboard_name)
+
+        return self.get_metadata(url)
+
+    def list_dashboards(self):
+
+        url = '{}/dashboards'.format(self.md_url)
+
+        return self.list_metadata(url)
+    
+    
+    def update_dashboard(self, dashboard_name, dashboard_update_json):
+
+        resp = self.get_dashboard_by_name(dashboard_name)
+
+        url = '{}/dashboards/{}'.format(self.md_url, resp.json()['id'])
+
+        return self.update_metadata(resp, url, dashboard_update_json)
+    
+
+    def create_dashboard(self, dashboard_create_json):
+
+        url = '{}/dashboards'.format(self.md_url)
+
+        resp = self.create_metadata(url, dashboard_create_json)
 
         return resp.json()
 
