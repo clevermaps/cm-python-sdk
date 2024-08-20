@@ -170,7 +170,7 @@ class _Maps(_MetadataBase):
 
     def get_map_by_name(self, map_name):
 
-        url = '{}/map?name={}'.format(self.md_url, map_name)
+        url = '{}/maps?name={}'.format(self.md_url, map_name)
 
         return self.get_metadata(url)
 
@@ -203,7 +203,7 @@ class _Dashboards(_MetadataBase):
 
     def get_dashboard_by_name(self, dashboard_name):
 
-        url = '{}/dashboard?name={}'.format(self.md_url, dashboard_name)
+        url = '{}/dashboards?name={}'.format(self.md_url, dashboard_name)
 
         return self.get_metadata(url)
 
