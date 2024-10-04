@@ -1,6 +1,9 @@
 from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_result
 import logging
 
+logger = logging.getLogger("cm-python-sdk")
+logger.propagate = True
+
 class Jobs:
     
     def __init__(self, client, project_id):
@@ -151,7 +154,7 @@ class _JobDetail(_JobsBase):
 
         resp_json = resp.json()
 
-        logging.info(resp_json)
+        logging.debug(resp_json)
 
         return resp_json
     
