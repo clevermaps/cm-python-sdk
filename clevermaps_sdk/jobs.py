@@ -3,6 +3,7 @@ import logging
 
 logger = logging.getLogger("cm-python-sdk")
 logger.propagate = True
+logger.setLevel(logging.DEBUG)
 
 class Jobs:
     
@@ -154,7 +155,7 @@ class _JobDetail(_JobsBase):
 
         resp_json = resp.json()
 
-        logging.debug(resp_json)
+        logger.debug(resp_json)
 
         return resp_json
     
