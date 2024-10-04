@@ -1,5 +1,5 @@
 from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_result
-
+import logging
 
 class Jobs:
     
@@ -125,8 +125,6 @@ class _Jobs(_JobsBase):
             }
         }
 
-        print(params)
-
         resp = self.client.make_request('post', url=url, params=params)
 
         return resp.json()
@@ -153,7 +151,7 @@ class _JobDetail(_JobsBase):
 
         resp_json = resp.json()
 
-        print(resp_json)
+        logging.info(resp_json)
 
         return resp_json
     
