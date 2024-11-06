@@ -124,7 +124,7 @@ class ProjectSdk():
         return self.export.export_data.get_export_data(job_result['result']['exportResult'])
 
 
-    def upload_data(self,dataset, mode, file, csv_options={}, retry_count=180, retry_wait=1):
+    def upload_data(self,dataset, mode, file, csv_options={}, retry_count=600, retry_wait=5):
 
         upload_link = self.dwh.data_upload.upload(file)
 
