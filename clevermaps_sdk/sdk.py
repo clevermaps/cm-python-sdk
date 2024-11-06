@@ -124,12 +124,12 @@ class ProjectSdk():
         return self.export.export_data.get_export_data(job_result['result']['exportResult'])
 
 
-    def upload_data(self,dataset, mode, file, csv_options={}):
+    def upload_data(self,dataset, mode, file, csv_options={}, retry_count=180, retry_wait=1):
 
         upload_link = self.dwh.data_upload.upload(file)
 
         job_resp = self.jobs.jobs.start_new_data_pull_job(dataset, mode, upload_link, csv_options)
-        job_result = self.jobs.job_detail.get_job_status(job_resp['links'][0]['href'])
+        job_result = self.jobs.job_detail.get_job_status(job_resp['links'][0]['href'], retry_count, retry_wait)
 
         return job_result
 
