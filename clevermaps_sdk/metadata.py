@@ -112,7 +112,7 @@ class _Indicators(_MetadataBase):
 
     def get_indicator_by_name(self, indicator_name):
 
-        url = '{}/indicator?name={}'.format(self.md_url, indicator_name)
+        url = '{}/indicators?name={}'.format(self.md_url, indicator_name)
 
         return self.get_metadata(url)
     
@@ -128,7 +128,7 @@ class _Indicators(_MetadataBase):
 
         resp = self.get_indicator_by_name(indicator_name)
 
-        url = '{}/indicator/{}'.format(self.md_url, resp.json()['id'])
+        url = '{}/indicators/{}'.format(self.md_url, resp.json()['id'])
 
         return self.update_metadata(resp, url, indicator_update_json)
     
@@ -137,7 +137,7 @@ class _IndicatorDrills(_MetadataBase):
 
     def get_indicator_drill_by_name(self, indicator_drill_name):
 
-        url = '{}/indicatorDrill?name={}'.format(self.md_url, indicator_drill_name)
+        url = '{}/indicatorDrills?name={}'.format(self.md_url, indicator_drill_name)
 
         return self.get_metadata(url)
     
