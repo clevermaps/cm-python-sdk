@@ -13,6 +13,7 @@ class Metadata:
 
         self.metrics = _Metrics(self.client, project_id)
         self.indicators = _Indicators(self.client, project_id)
+        self.indicator_drills = _IndicatorDrills(self.client, project_id)
         self.views = _Views(self.client, project_id)
         self.maps = _Maps(self.client, project_id)
         self.dashboards = _Dashboards(self.client, project_id)
@@ -130,6 +131,31 @@ class _Indicators(_MetadataBase):
         url = '{}/indicator/{}'.format(self.md_url, resp.json()['id'])
 
         return self.update_metadata(resp, url, indicator_update_json)
+    
+
+class _IndicatorDrills(_MetadataBase):
+
+    def get_indicator_drill_by_name(self, indicator_drill_name):
+
+        url = '{}/indicatorDrill?name={}'.format(self.md_url, indicator_drill_name)
+
+        return self.get_metadata(url)
+    
+
+    def list_indicator_drills(self):
+
+        url = '{}/indicatorDrills'.format(self.md_url)
+
+        return self.list_metadata(url)
+    
+
+    def update_metric(self, indicator_drill_name, indicator_drill_update_json):
+
+        resp = self.get_indicator_by_name(indicator_drill_name)
+
+        url = '{}/indicatorDrills/{}'.format(self.md_url, resp.json()['id'])
+
+        return self.update_metadata(resp, url, indicator_drill_update_json)
     
 
 class _Views(_MetadataBase):
