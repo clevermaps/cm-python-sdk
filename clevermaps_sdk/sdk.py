@@ -155,7 +155,7 @@ class ProjectSdk():
 
         job_resp = self.jobs.jobs.start_new_import_project_job(dest_project_id, src_project_id)
 
-        self.jobs.job_detail.get_job_status(job_resp['links'][0]['href'], retry_count=30, retry_wait=10)
+        self.jobs.job_detail.get_job_status(job_resp['links'][0]['href'])
 
         return dest_project_id
 
