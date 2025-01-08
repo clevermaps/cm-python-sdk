@@ -8,7 +8,7 @@ from .exceptions import AccessTokenException
 
 class Client:
 
-    def __init__(self, access_token, server_url=None, retry_count=30, retry_wait=6):
+    def __init__(self, access_token, server_url=None, retry_count=360, retry_wait=5):
 
         self.base_url = self._get_server_url(server_url)
         self.session = requests.Session()
