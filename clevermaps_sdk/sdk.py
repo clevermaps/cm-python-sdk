@@ -1,5 +1,6 @@
 from collections import OrderedDict
 import re
+import datetime
 
 from . import dwh, jobs, export, metadata, search, client, auditlog, common, projects, accounts
 
@@ -147,7 +148,7 @@ class ProjectSdk():
         src_project_id = self.project_id
         src_project_info = self.projects.project.get_project_by_id(self.project_id)
 
-        if not dest_project_title: dest_project_title = '{} - clone'.format(src_project_info['title'])
+        if not dest_project_title: dest_project_title = '{} - {}'.format(src_project_info['title'], datetime.datetime.now().strftime("%Y-%m-%d-%H:%M"))
         if not dest_project_description: dest_project_description = src_project_info['description']
 
         dest_project_id = self.projects.projects.create_project(dest_organization_id, dest_project_title, dest_project_description)['id']
