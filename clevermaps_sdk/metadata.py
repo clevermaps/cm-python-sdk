@@ -19,6 +19,7 @@ class Metadata:
         self.dashboards = _Dashboards(self.client, project_id)
         self.datasets = _Datasets(self.client, project_id)
         self.exports = _Exports(self.client, project_id)
+        self.project_settings = _ProjectSettings(self.client, project_id)
 
 
 class _MetadataBase:
@@ -99,13 +100,22 @@ class _Metrics(_MetadataBase):
         return self.list_metadata(url)
     
 
-    def update_metric(self, metric_name, metric_update_json):
+    def update_metric(self, metric_name, md_json):
 
         resp = self.get_metric_by_name(metric_name)
 
         url = '{}/metrics/{}'.format(self.md_url, resp.json()['id'])
 
-        return self.update_metadata(resp, url, metric_update_json)
+        return self.update_metadata(resp, url, md_json)
+    
+
+    def create_metric(self, md_json):
+
+        url = '{}/metrics'.format(self.md_url)
+
+        resp = self.create_metadata(url, md_json)
+
+        return resp.json()
     
 
 class _Indicators(_MetadataBase):
@@ -124,13 +134,22 @@ class _Indicators(_MetadataBase):
         return self.list_metadata(url)
     
 
-    def update_metric(self, indicator_name, indicator_update_json):
+    def update_indicator(self, indicator_name, md_json):
 
         resp = self.get_indicator_by_name(indicator_name)
 
         url = '{}/indicators/{}'.format(self.md_url, resp.json()['id'])
 
-        return self.update_metadata(resp, url, indicator_update_json)
+        return self.update_metadata(resp, url, md_json)
+    
+    
+    def create_indicator(self, md_json):
+
+        url = '{}/indicators'.format(self.md_url)
+
+        resp = self.create_metadata(url, md_json)
+
+        return resp.json()
     
 
 class _IndicatorDrills(_MetadataBase):
@@ -149,13 +168,22 @@ class _IndicatorDrills(_MetadataBase):
         return self.list_metadata(url)
     
 
-    def update_metric(self, indicator_drill_name, indicator_drill_update_json):
+    def update_indicator_drill(self, indicator_drill_name, md_json):
 
         resp = self.get_indicator_by_name(indicator_drill_name)
 
         url = '{}/indicatorDrills/{}'.format(self.md_url, resp.json()['id'])
 
-        return self.update_metadata(resp, url, indicator_drill_update_json)
+        return self.update_metadata(resp, url, md_json)
+    
+
+    def create_indicator_drill(self, md_json):
+
+        url = '{}/indicatorDrills'.format(self.md_url)
+
+        resp = self.create_metadata(url, md_json)
+
+        return resp.json()
     
 
 class _Views(_MetadataBase):
@@ -174,20 +202,20 @@ class _Views(_MetadataBase):
         return self.list_metadata(url)
     
     
-    def update_view(self, view_name, view_update_json):
+    def update_view(self, view_name, md_json):
 
         resp = self.get_view_by_name(view_name)
 
         url = '{}/views/{}'.format(self.md_url, resp.json()['id'])
 
-        return self.update_metadata(resp, url, view_update_json)
+        return self.update_metadata(resp, url, md_json)
     
 
-    def create_view(self, view_create_json):
+    def create_view(self, md_json):
 
         url = '{}/views'.format(self.md_url)
 
-        resp = self.create_metadata(url, view_create_json)
+        resp = self.create_metadata(url, md_json)
 
         return resp.json()
 
@@ -207,20 +235,20 @@ class _Maps(_MetadataBase):
         return self.list_metadata(url)
     
     
-    def update_map(self, map_name, map_update_json):
+    def update_map(self, map_name, md_json):
 
         resp = self.get_map_by_name(map_name)
 
         url = '{}/maps/{}'.format(self.md_url, resp.json()['id'])
 
-        return self.update_metadata(resp, url, view_update_json)
+        return self.update_metadata(resp, url, md_json)
     
 
-    def create_map(self, map_create_json):
+    def create_map(self, md_json):
 
         url = '{}/maps'.format(self.md_url)
 
-        resp = self.create_metadata(url, map_create_json)
+        resp = self.create_metadata(url, md_json)
 
         return resp.json()
 
@@ -240,20 +268,20 @@ class _Dashboards(_MetadataBase):
         return self.list_metadata(url)
     
     
-    def update_dashboard(self, dashboard_name, dashboard_update_json):
+    def update_dashboard(self, dashboard_name, md_json):
 
         resp = self.get_dashboard_by_name(dashboard_name)
 
         url = '{}/dashboards/{}'.format(self.md_url, resp.json()['id'])
 
-        return self.update_metadata(resp, url, dashboard_update_json)
+        return self.update_metadata(resp, url, md_json)
     
 
-    def create_dashboard(self, dashboard_create_json):
+    def create_dashboard(self, md_json):
 
         url = '{}/dashboards'.format(self.md_url)
 
-        resp = self.create_metadata(url, dashboard_create_json)
+        resp = self.create_metadata(url, md_json)
 
         return resp.json()
 
@@ -274,13 +302,22 @@ class _Datasets(_MetadataBase):
         return self.list_metadata(url)
     
     
-    def update_dataset(self, dataset_name, dataset_update_json):
+    def update_dataset(self, dataset_name, md_json):
 
         resp = self.get_dataset_by_name(dataset_name)
 
         url = '{}/datasets/{}'.format(self.md_url, resp.json()['id'])
 
-        return self.update_metadata(resp, url, dataset_update_json)
+        return self.update_metadata(resp, url, md_json)
+    
+
+    def create_dataset(self, md_json):
+
+        url = '{}/datasets'.format(self.md_url)
+
+        resp = self.create_metadata(url, md_json)
+
+        return resp.json()
 
 
 class _Exports(_MetadataBase):
@@ -290,6 +327,40 @@ class _Exports(_MetadataBase):
         url = '{}/exports'.format(self.md_url)
 
         return self.list_metadata(url)
+    
+
+class _ProjectSettings(_MetadataBase):
+
+    def get_project_settings_by_name(self, project_settings_name):
+
+        url = '{}/projectSettings?name={}'.format(self.md_url, project_settings_name)
+
+        return self.get_metadata(url)
+    
+
+    def list_project_settings(self):
+
+        url = '{}/projectSettings'.format(self.md_url)
+
+        return self.list_metadata(url)
+    
+    
+    def update_project_settings(self, project_settings_name, md_json):
+
+        resp = self.get_project_settings_by_name(project_settings_name)
+
+        url = '{}/projectSettings/{}'.format(self.md_url, resp.json()['id'])
+
+        return self.update_metadata(resp, url, md_json)
+    
+
+    def create_project_settings(self, md_json):
+
+        url = '{}/projectSettings'.format(self.md_url)
+
+        resp = self.create_metadata(url, md_json)
+
+        return resp.json()
 
 
 
