@@ -80,6 +80,8 @@ class Client:
             resp = self.session.get(url, params=params, headers=headers)
         elif method == 'put':
             resp = self.session.put(url, data=params, headers=headers)
+        elif method == 'delete':
+            resp = self.session.delete(url, headers=headers)
 
         return resp
     

@@ -35,7 +35,7 @@ class _MetadataBase:
         self.dwh_url = project_config['services']['dwh']
 
 
-    def get_metadata(self, url):
+    def _get_metadata(self, url):
 
         resp = self.client.make_request('get', url=url)
 
@@ -43,7 +43,7 @@ class _MetadataBase:
         return resp
     
 
-    def list_metadata(self, url):
+    def _list_metadata(self, url):
 
         resp = self.client.make_request_page('get', url=url)
 
@@ -56,7 +56,7 @@ class _MetadataBase:
         return results
     
     
-    def update_metadata(self, get_metadata_resp, update_metadata_url, update_metadata_json):
+    def _update_metadata(self, get_metadata_resp, update_metadata_url, update_metadata_json):
 
         http_etag = get_metadata_resp.headers['ETag']
         metadata_json = get_metadata_resp.json()
@@ -77,290 +77,318 @@ class _MetadataBase:
         return resp.json()
     
     
-    def create_metadata(self, url, create_metadata_json):
+    def _create_metadata(self, url, create_metadata_json):
 
         resp = self.client.make_request('post', url=url, params=create_metadata_json)
 
         return resp
     
+    
+    def _delete_metadata(self, url):
+
+        resp = self.client.make_request('delete', url)
+
+        return resp.status_code
+    
+
+    def get_by_name(self, md_type, md_name):
+
+        url = '{}/{}?name={}'.format(self.md_url, md_type, md_name)
+
+        return self._get_metadata(url)
+    
+    
+    def list(self, md_type):
+
+        url = '{}/{}'.format(self.md_url, md_type)
+
+        return self._list_metadata(url)
+    
+
+    def create(self, md_type, md_json):
+
+        url = '{}/{}'.format(self.md_url, md_type)
+
+        resp = self._create_metadata(url, md_json)
+
+        return resp.json()
+
+
+    def update(self, md_type, md_name, md_json):
+
+        resp = self.get_by_name(md_name)
+
+        url = '{}/{}/{}'.format(self.md_url, md_type, resp.json()['id'])
+
+        return self._update_metadata(resp, url, md_json)
+
+    
+    def delete(self, md_type, md_name):
+
+        md_id = self.get_by_name(md_name).json()['id']
+
+        url = '{}/{}/{}'.format(self.md_url, md_type, md_id)
+
+        return self._delete_metadata(url)
+
 
 class _Metrics(_MetadataBase):
 
-    def get_metric_by_name(self, metric_name):
+    def __init__(self, client, project_id):
 
-        url = '{}/metrics?name={}'.format(self.md_url, metric_name)
+        super().__init__(client, project_id)
 
-        return self.get_metadata(url)
+        self.md_type = 'metrics'
     
+    def get_by_name(self, md_name):
 
-    def list_metrics(self):
+        return super().get_by_name(self.md_type, md_name)
 
-        url = '{}/metrics'.format(self.md_url)
+    def list(self):
 
-        return self.list_metadata(url)
+        return super().list(self.md_type)
     
+    def create(self, md_json):
 
-    def update_metric(self, metric_name, md_json):
-
-        resp = self.get_metric_by_name(metric_name)
-
-        url = '{}/metrics/{}'.format(self.md_url, resp.json()['id'])
-
-        return self.update_metadata(resp, url, md_json)
+        return super().create(self.md_type, md_json)
     
+    def update(self, md_name, md_json):
 
-    def create_metric(self, md_json):
+        return super().update(self.md_type, md_name, md_json)
+    
+    def delete(self, md_name):
 
-        url = '{}/metrics'.format(self.md_url)
-
-        resp = self.create_metadata(url, md_json)
-
-        return resp.json()
+        return super().delete(self.md_type, md_name)
     
 
 class _Indicators(_MetadataBase):
 
-    def get_indicator_by_name(self, indicator_name):
+    def __init__(self, client, project_id):
 
-        url = '{}/indicators?name={}'.format(self.md_url, indicator_name)
+        super().__init__(client, project_id)
 
-        return self.get_metadata(url)
+        self.md_type = 'indicators'
     
+    def get_by_name(self, md_name):
 
-    def list_indicators(self):
+        return super().get_by_name(self.md_type, md_name)
 
-        url = '{}/indicators'.format(self.md_url)
+    def list(self):
 
-        return self.list_metadata(url)
+        return super().list(self.md_type)
     
+    def create(self, md_json):
 
-    def update_indicator(self, indicator_name, md_json):
-
-        resp = self.get_indicator_by_name(indicator_name)
-
-        url = '{}/indicators/{}'.format(self.md_url, resp.json()['id'])
-
-        return self.update_metadata(resp, url, md_json)
+        return super().create(self.md_type, md_json)
     
+    def update(self, md_name, md_json):
+
+        return super().update(self.md_type, md_name, md_json)
     
-    def create_indicator(self, md_json):
+    def delete(self, md_name):
 
-        url = '{}/indicators'.format(self.md_url)
-
-        resp = self.create_metadata(url, md_json)
-
-        return resp.json()
+        return super().delete(self.md_type, md_name)
     
 
 class _IndicatorDrills(_MetadataBase):
 
-    def get_indicator_drill_by_name(self, indicator_drill_name):
+    def __init__(self, client, project_id):
 
-        url = '{}/indicatorDrills?name={}'.format(self.md_url, indicator_drill_name)
+        super().__init__(client, project_id)
 
-        return self.get_metadata(url)
+        self.md_type = 'indicatorDrills'
     
+    def get_by_name(self, md_name):
 
-    def list_indicator_drills(self):
+        return super().get_by_name(self.md_type, md_name)
 
-        url = '{}/indicatorDrills'.format(self.md_url)
+    def list(self):
 
-        return self.list_metadata(url)
+        return super().list(self.md_type)
     
+    def create(self, md_json):
 
-    def update_indicator_drill(self, indicator_drill_name, md_json):
-
-        resp = self.get_indicator_by_name(indicator_drill_name)
-
-        url = '{}/indicatorDrills/{}'.format(self.md_url, resp.json()['id'])
-
-        return self.update_metadata(resp, url, md_json)
+        return super().create(self.md_type, md_json)
     
+    def update(self, md_name, md_json):
 
-    def create_indicator_drill(self, md_json):
+        return super().update(self.md_type, md_name, md_json)
+    
+    def delete(self, md_name):
 
-        url = '{}/indicatorDrills'.format(self.md_url)
-
-        resp = self.create_metadata(url, md_json)
-
-        return resp.json()
+        return super().delete(self.md_type, md_name)
     
 
 class _Views(_MetadataBase):
 
-    def get_view_by_name(self, view_name):
+    def __init__(self, client, project_id):
 
-        url = '{}/views?name={}'.format(self.md_url, view_name)
+        super().__init__(client, project_id)
 
-        return self.get_metadata(url)
+        self.md_type = 'views'
     
+    def get_by_name(self, md_name):
+
+        return super().get_by_name(self.md_type, md_name)
+
+    def list(self):
+
+        return super().list(self.md_type)
     
-    def list_views(self):
+    def create(self, md_json):
 
-        url = '{}/views'.format(self.md_url)
-
-        return self.list_metadata(url)
+        return super().create(self.md_type, md_json)
     
+    def update(self, md_name, md_json):
+
+        return super().update(self.md_type, md_name, md_json)
     
-    def update_view(self, view_name, md_json):
+    def delete(self, md_name):
 
-        resp = self.get_view_by_name(view_name)
-
-        url = '{}/views/{}'.format(self.md_url, resp.json()['id'])
-
-        return self.update_metadata(resp, url, md_json)
-    
-
-    def create_view(self, md_json):
-
-        url = '{}/views'.format(self.md_url)
-
-        resp = self.create_metadata(url, md_json)
-
-        return resp.json()
+        return super().delete(self.md_type, md_name)
 
 
 class _Maps(_MetadataBase):
 
-    def get_map_by_name(self, map_name):
+    def __init__(self, client, project_id):
 
-        url = '{}/maps?name={}'.format(self.md_url, map_name)
+        super().__init__(client, project_id)
 
-        return self.get_metadata(url)
-
-    def list_maps(self):
-
-        url = '{}/maps'.format(self.md_url)
-
-        return self.list_metadata(url)
+        self.md_type = 'maps'
     
+    def get_by_name(self, md_name):
+
+        return super().get_by_name(self.md_type, md_name)
+
+    def list(self):
+
+        return super().list(self.md_type)
     
-    def update_map(self, map_name, md_json):
+    def create(self, md_json):
 
-        resp = self.get_map_by_name(map_name)
-
-        url = '{}/maps/{}'.format(self.md_url, resp.json()['id'])
-
-        return self.update_metadata(resp, url, md_json)
+        return super().create(self.md_type, md_json)
     
+    def update(self, md_name, md_json):
 
-    def create_map(self, md_json):
+        return super().update(self.md_type, md_name, md_json)
+    
+    def delete(self, md_name):
 
-        url = '{}/maps'.format(self.md_url)
-
-        resp = self.create_metadata(url, md_json)
-
-        return resp.json()
+        return super().delete(self.md_type, md_name)
 
 
 class _Dashboards(_MetadataBase):
 
-    def get_dashboard_by_name(self, dashboard_name):
+    def __init__(self, client, project_id):
 
-        url = '{}/dashboards?name={}'.format(self.md_url, dashboard_name)
+        super().__init__(client, project_id)
 
-        return self.get_metadata(url)
-
-    def list_dashboards(self):
-
-        url = '{}/dashboards'.format(self.md_url)
-
-        return self.list_metadata(url)
+        self.md_type = 'dashboards'
     
+    def get_by_name(self, md_name):
+
+        return super().get_by_name(self.md_type, md_name)
+
+    def list(self):
+
+        return super().list(self.md_type)
     
-    def update_dashboard(self, dashboard_name, md_json):
+    def create(self, md_json):
 
-        resp = self.get_dashboard_by_name(dashboard_name)
-
-        url = '{}/dashboards/{}'.format(self.md_url, resp.json()['id'])
-
-        return self.update_metadata(resp, url, md_json)
+        return super().create(self.md_type, md_json)
     
+    def update(self, md_name, md_json):
 
-    def create_dashboard(self, md_json):
+        return super().update(self.md_type, md_name, md_json)
+    
+    def delete(self, md_name):
 
-        url = '{}/dashboards'.format(self.md_url)
-
-        resp = self.create_metadata(url, md_json)
-
-        return resp.json()
+        return super().delete(self.md_type, md_name)
 
 
 class _Datasets(_MetadataBase):
 
-    def get_dataset_by_name(self, dataset_name):
+    def __init__(self, client, project_id):
 
-        url = '{}/datasets?name={}'.format(self.md_url, dataset_name)
+        super().__init__(client, project_id)
 
-        return self.get_metadata(url)
-
+        self.md_type = 'datasets'
     
-    def list_datasets(self):
+    def get_by_name(self, md_name):
 
-        url = '{}/datasets'.format(self.md_url)
+        return super().get_by_name(self.md_type, md_name)
 
-        return self.list_metadata(url)
+    def list(self):
+
+        return super().list(self.md_type)
     
+    def create(self, md_json):
+
+        return super().create(self.md_type, md_json)
     
-    def update_dataset(self, dataset_name, md_json):
+    def update(self, md_name, md_json):
 
-        resp = self.get_dataset_by_name(dataset_name)
-
-        url = '{}/datasets/{}'.format(self.md_url, resp.json()['id'])
-
-        return self.update_metadata(resp, url, md_json)
+        return super().update(self.md_type, md_name, md_json)
     
+    def delete(self, md_name):
 
-    def create_dataset(self, md_json):
-
-        url = '{}/datasets'.format(self.md_url)
-
-        resp = self.create_metadata(url, md_json)
-
-        return resp.json()
+        return super().delete(self.md_type, md_name)
 
 
 class _Exports(_MetadataBase):
 
-    def list_exports(self):
+    def __init__(self, client, project_id):
 
-        url = '{}/exports'.format(self.md_url)
+        super().__init__(client, project_id)
 
-        return self.list_metadata(url)
+        self.md_type = 'exports'
+    
+    def get_by_name(self, md_name):
+
+        return super().get_by_name(self.md_type, md_name)
+
+    def list(self):
+
+        return super().list(self.md_type)
+    
+    def create(self, md_json):
+
+        return super().create(self.md_type, md_json)
+    
+    def update(self, md_name, md_json):
+
+        return super().update(self.md_type, md_name, md_json)
+    
+    def delete(self, md_name):
+
+        return super().delete(self.md_type, md_name)
     
 
 class _ProjectSettings(_MetadataBase):
 
-    def get_project_settings_by_name(self, project_settings_name):
+    def __init__(self, client, project_id):
 
-        url = '{}/projectSettings?name={}'.format(self.md_url, project_settings_name)
+        super().__init__(client, project_id)
 
-        return self.get_metadata(url)
+        self.md_type = 'projectSettings'
     
+    def get_by_name(self, md_name):
 
-    def list_project_settings(self):
+        return super().get_by_name(self.md_type, md_name)
 
-        url = '{}/projectSettings'.format(self.md_url)
+    def list(self):
 
-        return self.list_metadata(url)
+        return super().list(self.md_type)
     
+    def create(self, md_json):
+
+        return super().create(self.md_type, md_json)
     
-    def update_project_settings(self, project_settings_name, md_json):
+    def update(self, md_name, md_json):
 
-        resp = self.get_project_settings_by_name(project_settings_name)
+        return super().update(self.md_type, md_name, md_json)
 
-        url = '{}/projectSettings/{}'.format(self.md_url, resp.json()['id'])
+    def delete(self, md_name):
 
-        return self.update_metadata(resp, url, md_json)
-    
-
-    def create_project_settings(self, md_json):
-
-        url = '{}/projectSettings'.format(self.md_url)
-
-        resp = self.create_metadata(url, md_json)
-
-        return resp.json()
-
-
+        return super().delete(self.md_type, md_name)
 
