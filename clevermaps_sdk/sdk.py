@@ -143,7 +143,7 @@ class ProjectSdk():
         return job_result
 
 
-    def clone_project(self, dest_organization_id, dest_project_title=None, dest_project_description=None):
+    def clone_project(self, dest_organization_id, dest_project_title=None, dest_project_description=None, timeout_secs=1800):
 
         src_project_id = self.project_id
         src_project_info = self.projects.project.get_project_by_id(self.project_id)
@@ -155,7 +155,9 @@ class ProjectSdk():
 
         job_resp = self.jobs.jobs.start_new_import_project_job(dest_project_id, src_project_id)
 
-        self.jobs.job_detail.get_job_status(job_resp['links'][0]['href'])
+        retry_wait = 5
+        retry_count = timeout_secs/retry_wait
+        self.jobs.job_detail.get_job_status(job_resp['links'][0]['href'], retry_count=retry_count, retry_wait=retry_wait)
 
         return dest_project_id
 

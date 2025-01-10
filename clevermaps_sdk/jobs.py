@@ -136,7 +136,7 @@ class _Jobs(_JobsBase):
 
 class _JobDetail(_JobsBase):
 
-    def get_job_status(self, url, retry_count=180, retry_wait=1):
+    def get_job_status(self, url, retry_count=360, retry_wait=1):
         
       http_retry = retry(
           stop=stop_after_attempt(retry_count),
