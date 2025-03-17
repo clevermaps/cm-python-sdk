@@ -1,6 +1,6 @@
 # CleverMaps Python SDK
 
-The `clevermaps-python-sdk` package provides a convenient way to interact with CleverMaps platform over the REST API (https://clevermaps.docs.apiary.io/#).
+The `cm-python-sdk` package provides high-level functions to interact with the CleverMaps platform over the REST API (https://clevermaps.docs.apiary.io/#).
 
 The package can be used in following use cases:
 * Custom data apps
@@ -26,9 +26,9 @@ Currently supported functions:
 
 ## Installation
 
-Run the following command to install the `clevermaps-python-sdk` package on your system:
+Run the following command to install the `cm-python-sdk` package on your system:
 
-    pip install git+https://github.com/clevermaps/clevermaps-python-sdk.git
+    pip install git+https://github.com/clevermaps/cm-python-sdk.git
 
 ## Example
 
