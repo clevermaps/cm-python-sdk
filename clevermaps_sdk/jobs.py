@@ -98,7 +98,7 @@ class _Jobs(_JobsBase):
         return resp.json()
     
 
-    def start_new_import_project_job(self, project_id, source_project_id):
+    def start_new_import_project_job(self, project_id, source_project_id, skip_data=False):
         
         url = '/rest/jobs'
 
@@ -107,7 +107,8 @@ class _Jobs(_JobsBase):
             "projectId": project_id,
             "content": {
               "sourceProjectId": source_project_id,
-              "force": True
+              "force": True,
+              "skipData": skip_data
             }
         }
 

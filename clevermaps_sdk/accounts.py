@@ -23,4 +23,6 @@ class _Accounts:
 
         resp = self.client.make_request('get', url=url, params=params)
 
-        return resp.json()
+        #return resp.json()
+    
+        return resp.status_code
