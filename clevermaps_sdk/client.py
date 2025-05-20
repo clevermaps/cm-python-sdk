@@ -10,8 +10,7 @@ class Client:
 
     def __init__(self, access_token, server_url=None, retry_count=360, retry_wait=5):
 
-        #self.base_url = self._get_server_url(server_url)
-        self.base_url = server_url
+        self.base_url = self._get_server_url(server_url)
         self.session = requests.Session()
         self.retry_count = retry_count
         self.retry_wait = retry_wait
@@ -19,12 +18,13 @@ class Client:
 
     def _get_server_url(self, server_url):
 
-        valid_urls = ["https://secure.clevermaps.io", "https://staging.clevermaps.io"]
+        default_url = "https://secure.clevermaps.io"
 
         if not server_url:
-            return valid_urls[0]
-        elif server_url and server_url not in valid_urls:
-            return valid_urls[0]
+            return default_url
+        else:
+            # TODO validate by regex
+            return server_url
         
     def _get_token(self, access_token):
 
