@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "clevermaps-python-sdk"
+version = "0.1.0"
+description = "\"Python SDK client for the CleverMaps REST API\""
+authors = ["Karel Psota <karel.psota@clevermaps.io>"]
+license = "\"License :: OSI Approved :: MIT License\""
+readme = "README.md"
+packages = [{ include = "clevermaps_sdk" }]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+requests = ">=2.30.0"
+pydantic = ">=2.0.0"
+tenacity = ">=8.2.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
