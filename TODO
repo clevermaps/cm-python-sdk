@@ -5,5 +5,3 @@ kdyz se hitne max retry tak to nevypise nejakou srozumitelnou hlasku
 logging
 unit tests
 custom exceptions
-
-refactor metadata - DRY code + obecne nazvy metod (create, list, update, delete, ...) - kde vsude ale uz mam pouzite? CS KPI jen?

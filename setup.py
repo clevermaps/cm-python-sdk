@@ -5,7 +5,7 @@ setuptools.setup(
     version="0.0.1",
     author="Karel Psota",
     author_email="karel.psota@clevermaps.io",
-    description="Python SDK client for the CleverMaps API",
+    description="Python SDK client for the CleverMaps REST API",
     packages=setuptools.find_packages(),
     install_requires=[
         'requests>=2.30.0',
